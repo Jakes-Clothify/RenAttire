@@ -1,0 +1,436 @@
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700&family=Manrope:wght@400;500;600;700;800&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bg: #f6f3ed;
+    --ink: #1c2427;
+    --muted: #6e797d;
+    --panel: rgba(255, 255, 255, 0.86);
+    --line: rgba(28, 36, 39, 0.12);
+    --brand: #0f8a78;
+    --brand-deep: #0a5f52;
+    --accent: #e7922e;
+    --danger: #b6483d;
+  }
+
+  body {
+    overflow-x: hidden;
+    font-family: "Manrope", sans-serif;
+    color: var(--ink);
+    background:
+      radial-gradient(circle at 12% 20%, rgba(231, 146, 46, 0.16), transparent 30%),
+      radial-gradient(circle at 88% 0%, rgba(15, 138, 120, 0.15), transparent 34%),
+      linear-gradient(180deg, #fbfaf7 0%, var(--bg) 62%);
+    min-height: 100vh;
+  }
+}
+
+@layer components {
+  .page-shell {
+    @apply max-w-6xl mx-auto px-4 py-6 md:px-6;
+  }
+
+  .surface {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    @apply rounded-xl backdrop-blur-sm;
+  }
+
+  .title-serif {
+    font-family: "Fraunces", serif;
+    letter-spacing: 0.01em;
+  }
+
+  .btn-brand {
+    background: var(--brand);
+    @apply text-white rounded-lg px-4 py-2 font-semibold transition;
+  }
+
+  .btn-brand:hover {
+    background: var(--brand-deep);
+  }
+
+  .btn-outline {
+    border: 1px solid var(--line);
+    color: var(--ink);
+    @apply rounded-lg px-4 py-2 bg-white transition;
+  }
+
+  .btn-outline:hover {
+    background: #f4f4f3;
+  }
+
+  .field-label {
+    @apply block text-sm font-semibold mb-1;
+  }
+
+  .field-input {
+    @apply w-full border border-black/15 rounded-lg px-3 py-2 bg-white/90 outline-none transition;
+  }
+
+  .field-input:focus {
+    border-color: rgba(15, 138, 120, 0.65);
+    box-shadow: 0 0 0 3px rgba(15, 138, 120, 0.15);
+  }
+}
+
+/* Style.layout */
+
+@layer components {
+
+    .product-actions {
+    @apply flex flex-wrap gap-2;
+    }
+
+}
+@layer components {
+
+/* header container */
+    .app-header {
+    @apply sticky top-0 z-40 border-b border-black/10
+            bg-white/75 backdrop-blur-md;
+    }
+
+    /* header inner layout */
+    .header-inner {
+    @apply page-shell py-3 flex flex-wrap items-center justify-between gap-3;
+    }
+
+    /* navigation layout */
+    .navbar {
+    @apply flex flex-wrap items-center gap-1;
+    }
+
+    /* page wrapper */
+    .app-main {
+    @apply page-shell;
+    }
+
+}
+
+@layer components {
+
+/* hero */
+    .hero {
+    @apply surface overflow-hidden;
+    }
+
+    .hero-inner {
+    @apply h-56 md:h-64 px-6 md:px-10 flex flex-col justify-center
+            bg-gradient-to-r from-amber-100 via-orange-100 to-emerald-100;
+    }
+
+    /* main layout */
+    .home-layout {
+    @apply flex flex-col gap-6 lg:flex-row;
+    }
+
+    .sidebar {
+    @apply surface w-full lg:w-72 p-4 md:p-5 h-fit;
+    }
+
+    .products-section {
+    @apply flex-1 space-y-4;
+    }
+
+    /* grid */
+    .product-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4;
+    }
+
+    /* pagination container */
+    .pagination {
+    @apply mt-6 flex items-center justify-center gap-2;
+    }
+
+}
+
+@layer components {
+
+    .cart-info {
+    @apply flex flex-col;
+    }
+
+    .cart-controls {
+    @apply flex items-center gap-2;
+    }
+
+}
+
+@layer components {
+
+    /* header with button on right */
+    .split-header {
+    @apply surface p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3;
+    }
+
+    /* rental metadata grid */
+    .rental-meta {
+    @apply mt-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 text-sm text-gray-700;
+    }
+
+    /* actions under card */
+    .rental-actions {
+    @apply mt-4;
+    }
+
+}
+
+@layer components {
+
+    /* centered form page */
+    .form-page {
+    @apply max-w-2xl mx-auto;
+    }
+
+    /* stack spacing between inputs */
+    .form-stack {
+    @apply mt-4 space-y-4;
+    }
+
+}
+
+@layer components {
+
+    /* smaller auth container */
+    .auth-page {
+    @apply max-w-md mx-auto;
+    }
+
+}
+
+/* Style.component*/
+
+@layer components {
+
+    /* ===== Product Card ===== */
+
+    .product-card {
+    @apply surface p-4 transition-transform hover:-translate-y-0.5;
+    }
+
+    .product-image {
+    @apply w-full h-52 object-cover rounded-lg mb-3;
+    }
+
+    .product-price {
+    @apply text-gray-700 mb-3;
+    }
+
+    .product-unavailable {
+    @apply text-red-600 mt-2 font-medium;
+    }
+
+    /* admin delete button */
+    .btn-danger {
+    @apply px-4 py-2 rounded-lg bg-red-700 text-white font-semibold
+            hover:bg-red-800 transition;
+    }
+
+}
+
+@layer components {
+
+    /* navigation links */
+    .nav-link {
+    @apply px-3 py-2 rounded-lg text-sm font-semibold transition
+            text-gray-700 hover:bg-white/70;
+    }
+
+    .nav-link-active {
+    @apply bg-white text-black shadow-sm;
+    }
+
+    /* logout variant */
+    .btn-logout {
+    @apply btn-outline text-sm font-semibold;
+    }
+
+}
+
+@layer components {
+
+    /* info bar */
+    .results-bar {
+    @apply surface px-4 py-3 text-sm text-gray-700;
+    }
+
+    /* status messages */
+    .msg-error {
+    @apply col-span-full text-red-600;
+    }
+
+    .msg-empty {
+    @apply col-span-full text-gray-600;
+    }
+
+    /* pagination buttons */
+    .page-btn {
+    @apply border rounded px-3 py-1 disabled:opacity-50;
+    }
+
+}
+
+@layer components {
+
+    /* page header */
+    .page-header {
+    @apply surface p-5;
+    }
+
+/* cart item row */
+    .cart-row {
+    @apply surface flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 gap-3;
+    }
+
+    /* remove button */
+    .btn-remove {
+    @apply text-red-700 border border-red-700 rounded-lg px-3 py-1 font-semibold
+            hover:bg-red-700 hover:text-white transition;
+    }
+
+    /* summary box */
+    .cart-summary {
+    @apply surface p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3;
+    }
+
+    /* messages */
+    .msg-success {
+    @apply text-green-600 mt-2;
+    }
+
+}
+
+@layer components {
+
+/* empty state */
+    .empty-state {
+    @apply surface p-6 text-gray-600;
+    }
+
+    /* rental card */
+    .rental-card {
+    @apply surface p-4;
+    }
+
+    /* status badges */
+    .status-active {
+    @apply inline-block px-2 py-0.5 rounded bg-emerald-100 text-emerald-700 font-semibold;
+    }
+
+    .status-returned {
+    @apply inline-block px-2 py-0.5 rounded bg-gray-200 text-gray-700 font-semibold;
+    }
+
+    .status-late {
+    @apply inline-block px-2 py-0.5 rounded bg-red-100 text-red-700 font-semibold;
+    }
+
+}
+
+@layer components {
+
+    /* form container card */
+    .form-panel {
+    @apply surface p-6 md:p-7;
+    }
+
+    /* messages */
+    .msg-success {
+    @apply text-green-700 mt-3;
+    }
+
+    .msg-error {
+    @apply text-red-600 mt-3;
+    }
+
+}
+
+@layer components {
+
+    /* auth helper text link */
+    .auth-link {
+    @apply text-teal-700 font-semibold hover:underline;
+    }
+
+    /* auth footer text */
+    .auth-footer {
+    @apply text-sm text-gray-600 mt-4;
+    }
+
+}
+
+/* Style.form */
+@layer components {
+
+    .filter-label {
+    @apply block text-sm font-semibold mb-1;
+    }
+
+    .filter-input {
+    @apply w-full border border-black/15 rounded-lg px-3 py-2 mb-3 bg-white/90;
+    }
+
+    .filter-select {
+    @apply w-full border border-black/15 rounded-lg px-3 py-2 mb-3 bg-white/90;
+    }
+
+    .filter-checkbox {
+    @apply flex items-center gap-2 mb-5 text-sm text-gray-700;
+    }
+
+}
+
+@layer components {
+
+    .qty-input {
+    @apply w-16 border border-black/15 rounded-lg px-2 py-1 bg-white;
+    }
+
+}
+
+@layer components {
+
+    .form-field {
+    @apply flex flex-col gap-1;
+    }
+
+    .field-label {
+    @apply text-sm font-semibold text-gray-800;
+    }
+
+    .field-input {
+    @apply w-full border border-black/15 rounded-lg px-3 py-2 bg-white
+            focus:outline-none focus:ring-2 focus:ring-black/30;
+    }
+
+    .status-badge {
+      @apply absolute top-2 left-2 px-2 py-1 text-xs font-semibold rounded-md text-white;
+    }
+
+    .status-available {
+      @apply bg-emerald-600;
+    }
+
+    .status-rented {
+      @apply bg-red-600;
+    }
+
+    .status-returning {
+      @apply bg-amber-500;
+    }
+
+      .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+
+}
