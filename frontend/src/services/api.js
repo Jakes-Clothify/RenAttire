@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "https://clothify-wb4m.onrender.com"
+  baseURL: "https://clothify-wb4m.onrender.com/api"
 });
 
 // 🔥 Attach token automatically
