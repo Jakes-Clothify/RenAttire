@@ -2,6 +2,9 @@ import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { addToCart } from "../features/cartSlice";
 
+// backend URL (Render)
+const BACKEND_URL = "https://clothify-wb4m.onrender.com";
+
 function Productcard({ item, refreshClothes }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -13,43 +16,76 @@ function Productcard({ item, refreshClothes }) {
 
   const getStatusInfo = () => {
     if (item.status === "available") {
-      return { label: "Available", className: "status-available", canRent: true };
+      return {
+        label: "Available",
+        className: "status-available",
+        canRent: true
+      };
     }
 
     if (item.status === "returning_soon") {
-      return { label: "Returning Soon", className: "status-returning", canRent: false };
+      return {
+        label: "Returning Soon",
+        className: "status-returning",
+        canRent: false
+      };
     }
 
-    return { label: "Rented", className: "status-rented", canRent: false };
+    return {
+      label: "Rented",
+      className: "status-rented",
+      canRent: false
+    };
   };
 
   const statusInfo = getStatusInfo();
-  const cardImage = (Array.isArray(item.images) && item.images[0]) || item.image;
+
+  // handle single image or images array
+  const cardImage =
+    (Array.isArray(item.images) && item.images[0]) || item.image;
+
+  const imageUrl = cardImage
+    ? `${BACKEND_URL}/uploads/${cardImage}`
+    : "/placeholder.png";
 
   return (
     <div className="product-card">
       <Link to={`/cloth/${item._id}`} className="product-media">
         <div className="product-image-wrapper">
-          <img src={`http://clothify-wb4m.onrender.com/uploads/${cardImage}`} alt={item.name} loading="lazy" />
+          <img
+            src={imageUrl}
+            alt={item.name}
+            loading="lazy"
+          />
         </div>
 
-        <span className={`product-badge ${statusInfo.className}`}>{statusInfo.label}</span>
+        <span className={`product-badge ${statusInfo.className}`}>
+          {statusInfo.label}
+        </span>
       </Link>
 
       <div className="product-info">
         <h2 className="product-title">{item.name}</h2>
 
         <p className="product-desc">
-          {item.description?.trim() || "Premium rental outfit - Perfect for occasions"}
+          {item.description?.trim() ||
+            "Premium rental outfit - Perfect for occasions"}
         </p>
 
         <p className="product-price">₹{item.pricePerDay}/day</p>
 
-        <button onClick={() => dispatch(addToCart(item))} className="primary-action">
+        <button
+          onClick={() => dispatch(addToCart(item))}
+          className="primary-action"
+        >
           Add to Cart
         </button>
 
-        <button onClick={handleRent} disabled={!statusInfo.canRent} className="secondary-action">
+        <button
+          onClick={handleRent}
+          disabled={!statusInfo.canRent}
+          className="secondary-action"
+        >
           {statusInfo.canRent ? "Rent Now" : statusInfo.label}
         </button>
       </div>
