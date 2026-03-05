@@ -23,6 +23,7 @@ function ClothDetails() {
   const [cloth, setCloth] = useState(null);
   const [bookedDates, setBookedDates] = useState([]);
   const [relatedItems, setRelatedItems] = useState([]);
+  const [selectedImage, setSelectedImage] = useState("");
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -51,15 +52,17 @@ function ClothDetails() {
     comment: "",
   });
 
-  const isAdmin = () => {
+  const getCurrentUser = () => {
     try {
       const token = localStorage.getItem("token");
-      if (!token) return false;
-      return JSON.parse(atob(token.split(".")[1]))?.role === "admin";
+      if (!token) return null;
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      return { id: payload.id, role: payload.role };
     } catch {
-      return false;
+      return null;
     }
   };
+  const currentUser = getCurrentUser();
 
   useEffect(() => {
     const loadPage = async () => {
@@ -73,7 +76,16 @@ function ClothDetails() {
 
         const allItems = Array.isArray(allRes.data) ? allRes.data : allRes.data.items || [];
 
-        setCloth(clothRes.data);
+        const clothData = clothRes.data;
+        const gallery =
+          Array.isArray(clothData.images) && clothData.images.length
+            ? clothData.images
+            : clothData.image
+              ? [clothData.image]
+              : [];
+
+        setCloth(clothData);
+        setSelectedImage(gallery[0] || "");
         setBookedDates(bookedRes.data || []);
         setRelatedItems(allItems.filter((item) => item._id !== id).slice(0, 4));
       } catch {
@@ -137,7 +149,16 @@ function ClothDetails() {
     : "Standard";
 
   const measurements = cloth?.availableSizes?.[0]?.measurements || {};
-  const highlights = fitHighlights[cloth?.fitProfile] || fitHighlights.free;
+  const highlights =
+    Array.isArray(cloth?.highlights) && cloth.highlights.length > 0
+      ? cloth.highlights
+      : fitHighlights[cloth?.fitProfile] || fitHighlights.free;
+  const hasMeasurements = Object.keys(measurements).length > 0;
+  const estDeliveryDate = useMemo(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 2);
+    return d.toLocaleDateString();
+  }, []);
 
   const handleRent = async () => {
     setBookingError("");
@@ -187,8 +208,8 @@ function ClothDetails() {
       await api.delete(`/clothes/${id}`);
       alert("Deleted");
       navigate("/shop");
-    } catch {
-      alert("Not allowed");
+    } catch (err) {
+      alert(err.response?.data?.message || "Not allowed");
     }
   };
 
@@ -212,183 +233,301 @@ function ClothDetails() {
 
   if (loading) return <div className="page-loader">Loading...</div>;
   if (!cloth) return null;
+  const ownerId = String(cloth.createdBy?._id || cloth.createdBy || "");
+  const canManageProduct =
+    currentUser?.role === "admin" && (!ownerId || String(currentUser.id) === ownerId);
+  const galleryImages = Array.from(
+    new Set(
+      [
+        ...(Array.isArray(cloth.images) ? cloth.images : []),
+        cloth.image || "",
+      ].filter(Boolean)
+    )
+  );
+  const activeImage = selectedImage || galleryImages[0] || cloth.image;
+  const activeIndex = Math.max(0, galleryImages.findIndex((img) => img === activeImage));
+  const canSlide = galleryImages.length > 1;
+  const goToPrevImage = () => {
+    if (!canSlide) return;
+    const nextIndex = (activeIndex - 1 + galleryImages.length) % galleryImages.length;
+    setSelectedImage(galleryImages[nextIndex]);
+  };
+  const goToNextImage = () => {
+    if (!canSlide) return;
+    const nextIndex = (activeIndex + 1) % galleryImages.length;
+    setSelectedImage(galleryImages[nextIndex]);
+  };
 
   return (
-    <div className="pdp-page">
-      <div className="pdp-main">
-        <div className="pdp-head surface">
-          <div className="pdp-breadcrumbs">
-            <Link to="/">Home</Link>
-            <span>/</span>
-            <Link to="/shop">Shop</Link>
-            <span>/</span>
-            <span>{normalizedType}</span>
-          </div>
-
-          <p className="pdp-overline">{normalizedType} | {normalizedProfile} Fit</p>
-          <h1 className="pdp-title">{cloth.name}</h1>
-
-          <div className="pdp-rating">
-            <span className="pdp-stars">*****</span>
-            <strong>{reviewScore}</strong>
-            <span>({reviewCount} reviews)</span>
-          </div>
-
-          <div className="pdp-price-row">
-            <p className="pdp-price">Rs {cloth.pricePerDay}</p>
-            <p className="pdp-price-sub">/day</p>
-            <p className="pdp-strike">Rs {originalPrice}</p>
-            <span className="pdp-save">Save {savePercent}% vs buying</span>
-          </div>
-
-          <div className={`pdp-status ${statusMeta.cls}`}>
-            <span>{statusMeta.label}</span>
-            <small>{statusMeta.text}</small>
-          </div>
-        </div>
-
-        <div className="pdp-media surface">
-          <img src={`http://localhost:5000${cloth.image}`} alt={cloth.name} />
-        </div>
-
-        <div className="pdp-card surface">
-          <h3 className="pdp-card-title">Why this piece works</h3>
-          <ul className="pdp-list">
-            {highlights.map((line) => (
-              <li key={line}>{line}</li>
-            ))}
-          </ul>
-        </div>
-
-        <div className="pdp-card surface">
-          <h3 className="pdp-card-title">Fit and Measurements</h3>
-          {!Object.keys(measurements).length ? (
-            <p className="muted">Measurement data not available.</p>
-          ) : (
-            <div className="pdp-measure-grid">
-              {Object.entries(measurements).map(([key, value]) => (
-                <div key={key} className="pdp-measure-item">
-                  <span>{key}</span>
-                  <strong>{value} cm</strong>
-                </div>
+    <div className="pdp-page pdp-amz-page pdp-polish pdp-vibe-next">
+      <section className="pdp-amz-main">
+        <div className="pdp-amz-gallery surface">
+          <div className="pdp-amz-gallery-shell">
+            <div className="pdp-amz-thumb-rail">
+              {galleryImages.map((img, idx) => (
+                <button
+                  key={`${img}-${idx}`}
+                  type="button"
+                  className={`pdp-amz-thumb ${activeImage === img ? "active" : ""}`}
+                  onClick={() => setSelectedImage(img)}
+                >
+                  <img src={`http://localhost:5000${img}`} alt={`${cloth.name} ${idx + 1}`} />
+                </button>
               ))}
             </div>
-          )}
+            <div className="pdp-amz-media">
+              <img src={`http://localhost:5000${activeImage}`} alt={cloth.name} />
+              {canSlide && (
+                <>
+                  <button type="button" className="pdp-gallery-nav pdp-gallery-prev" onClick={goToPrevImage}>
+                    ‹
+                  </button>
+                  <button type="button" className="pdp-gallery-nav pdp-gallery-next" onClick={goToNextImage}>
+                    ›
+                  </button>
+                </>
+              )}
+              <div className="pdp-vibe-floating">
+                <strong>{normalizedType}</strong>
+                <span>{normalizedProfile} Fit</span>
+              </div>
+              <div className="pdp-gallery-counter">
+                {activeIndex + 1}/{galleryImages.length}
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div className="pdp-card surface">
-          <h3 className="pdp-card-title">Current Bookings</h3>
-          {bookedDates.length === 0 ? (
-            <p className="muted">No active bookings for this item.</p>
-          ) : (
-            <div className="pdp-booked-list">
-              {bookedDates.map((slot, index) => (
-                <div key={`${slot.startDate}-${index}`} className="pdp-booked-row">
-                  <span>{new Date(slot.startDate).toLocaleDateString()}</span>
-                  <span>to</span>
-                  <span>{new Date(slot.endDate).toLocaleDateString()}</span>
-                </div>
+        <div className="pdp-amz-center">
+          <div className="pdp-head surface">
+            <div className="pdp-breadcrumbs">
+              <Link to="/">Home</Link>
+              <span>/</span>
+              <Link to="/shop">Shop</Link>
+              <span>/</span>
+              <span>{normalizedType}</span>
+            </div>
+
+            <p className="pdp-overline">Signature Rental Edit</p>
+            <h1 className="pdp-title">{cloth.name}</h1>
+
+            <div className="pdp-rating">
+              <span className="pdp-stars">*****</span>
+              <strong>{reviewScore}</strong>
+              <span>({reviewCount} ratings)</span>
+            </div>
+
+            <div className="pdp-vibe-divider" />
+
+            <div className="pdp-price-row">
+              <p className="pdp-price">Rs {cloth.pricePerDay}</p>
+              <p className="pdp-price-sub">/day</p>
+              <p className="pdp-strike">Rs {originalPrice}</p>
+              <span className="pdp-save">Save {savePercent}% vs buying</span>
+            </div>
+
+            <div className={`pdp-status ${statusMeta.cls}`}>
+              <span>{statusMeta.label}</span>
+              <small>{statusMeta.text}</small>
+            </div>
+
+            <div className="pdp-polish-tags">
+              {cloth.brand && <span>{cloth.brand}</span>}
+              {cloth.fabric && <span>{cloth.fabric}</span>}
+              {cloth.occasion && <span>{cloth.occasion}</span>}
+              <span>Verified Cleaned</span>
+            </div>
+
+            <div className="pdp-amz-delivery">
+              <p>
+                Delivery by <strong>{estDeliveryDate}</strong> | Free pickup on return
+              </p>
+            </div>
+          </div>
+
+          <div className="pdp-card surface">
+            <h3 className="pdp-card-title">About this item</h3>
+            <p className="pdp-amz-desc">
+              {cloth.description?.trim() || "No description available for this outfit yet."}
+            </p>
+            {cloth.detailedDescription?.trim() && (
+              <p className="pdp-amz-desc">{cloth.detailedDescription.trim()}</p>
+            )}
+            <ul className="pdp-list">
+              {highlights.map((line) => (
+                <li key={line}>{line}</li>
               ))}
+            </ul>
+          </div>
+
+          <div className="pdp-card surface">
+            <h3 className="pdp-card-title">Product specs</h3>
+            <div className="pdp-amz-spec-grid">
+              <div>
+                <span>Category</span>
+                <strong>{normalizedType}</strong>
+              </div>
+              {cloth.brand && (
+                <div>
+                  <span>Brand</span>
+                  <strong>{cloth.brand}</strong>
+                </div>
+              )}
+              {cloth.color && (
+                <div>
+                  <span>Color</span>
+                  <strong>{cloth.color}</strong>
+                </div>
+              )}
+              {cloth.fabric && (
+                <div>
+                  <span>Fabric</span>
+                  <strong>{cloth.fabric}</strong>
+                </div>
+              )}
+              {cloth.occasion && (
+                <div>
+                  <span>Occasion</span>
+                  <strong>{cloth.occasion}</strong>
+                </div>
+              )}
+              <div>
+                <span>Fit Profile</span>
+                <strong>{normalizedProfile}</strong>
+              </div>
+              <div>
+                <span>Availability</span>
+                <strong>{statusMeta.label}</strong>
+              </div>
+              <div>
+                <span>Booked Slots</span>
+                <strong>{bookedDates.length}</strong>
+              </div>
+            </div>
+            {cloth.careInstructions?.trim() && (
+              <p className="pdp-amz-desc mt-3">
+                <strong>Care:</strong> {cloth.careInstructions.trim()}
+              </p>
+            )}
+          </div>
+
+          <div className="pdp-card surface">
+            <h3 className="pdp-card-title">Fit and Measurements</h3>
+            {!hasMeasurements ? (
+              <p className="muted">Measurement data not available.</p>
+            ) : (
+              <div className="pdp-measure-grid">
+                {Object.entries(measurements).map(([key, value]) => (
+                  <div key={key} className="pdp-measure-item">
+                    <span>{key}</span>
+                    <strong>{value} cm</strong>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <aside className="pdp-booking surface">
+          <h3>Rent this outfit</h3>
+          <p className="pdp-vibe-secure">Trusted quality check | Secure rental workflow</p>
+          <p className="pdp-book-note">Blocked dates are already reserved and cannot be selected.</p>
+
+          <div className="pdp-quick-days">
+            <button type="button" onClick={() => handleQuickDuration(2)}>2 Days</button>
+            <button type="button" onClick={() => handleQuickDuration(4)}>4 Days</button>
+            <button type="button" onClick={() => handleQuickDuration(7)}>7 Days</button>
+          </div>
+
+          <div className="pdp-date-grid">
+            <div>
+              <label className="field-label">Start Date</label>
+              <DatePicker
+                selected={startDate}
+                onChange={(date) => {
+                  setStartDate(date);
+                  if (endDate && date > endDate) setEndDate(null);
+                }}
+                selectsStart
+                startDate={startDate}
+                endDate={endDate}
+                minDate={new Date()}
+                excludeDateIntervals={blockedIntervals}
+                className="date-input"
+                placeholderText="Select start date"
+                disabled={!isAvailable || submitting}
+              />
+            </div>
+
+            <div>
+              <label className="field-label">End Date</label>
+              <DatePicker
+                selected={endDate}
+                onChange={(date) => setEndDate(date)}
+                selectsEnd
+                startDate={startDate}
+                endDate={endDate}
+                minDate={startDate || new Date()}
+                excludeDateIntervals={blockedIntervals}
+                className="date-input"
+                placeholderText="Select end date"
+                disabled={!isAvailable || submitting}
+              />
+            </div>
+          </div>
+
+          <div className="pdp-summary">
+            <div>
+              <span>Total Days</span>
+              <strong>{totalDays}</strong>
+            </div>
+            <div>
+              <span>Subtotal</span>
+              <strong>Rs {totalPrice}</strong>
+            </div>
+            <div>
+              <span>Delivery + Care</span>
+              <strong>Included</strong>
+            </div>
+          </div>
+
+          <div className="pdp-selected-range">
+            <span>Selected</span>
+            <strong>
+              {startDate ? startDate.toLocaleDateString() : "--"} to {endDate ? endDate.toLocaleDateString() : "--"}
+            </strong>
+          </div>
+
+          <button className="rent-main-btn" disabled={!isAvailable || submitting} onClick={handleRent}>
+            {submitting ? "Placing Rental..." : isAvailable ? "Rent Now" : "Currently Unavailable"}
+          </button>
+          {bookingError && <p className="pdp-booking-error">{bookingError}</p>}
+
+          <button className="btn-outline w-full mt-2" onClick={handleAddToCart}>
+            Add to Cart
+          </button>
+          {cartMessage && <p className="pdp-cart-msg">{cartMessage}</p>}
+
+          <div className="pdp-policy">
+            <h4>Rental Policy</h4>
+            <p>Free cancellation up to 24 hours before delivery.</p>
+            <p>Late return charges apply after grace period.</p>
+            <p>Professional cleaning is included in rental fee.</p>
+          </div>
+
+          {canManageProduct && (
+            <div className="pdp-admin-row pdp-admin-actions">
+              <Link className="btn-outline pdp-admin-btn pdp-admin-btn-link" to={`/admin/cloth/${id}/edit`}>
+                Edit Product
+              </Link>
+              <button className="delete-product-btn pdp-admin-btn" onClick={handleDelete}>
+                Delete Product
+              </button>
+              <div className="pdp-admin-note">Owner admin action: only your own product can be changed.</div>
             </div>
           )}
-        </div>
-      </div>
-
-      <aside className="pdp-booking surface">
-        <h3>Book this outfit</h3>
-        <p className="pdp-book-note">Blocked dates are already reserved and cannot be selected.</p>
-
-        <div className="pdp-quick-days">
-          <button type="button" onClick={() => handleQuickDuration(2)}>2 Days</button>
-          <button type="button" onClick={() => handleQuickDuration(4)}>4 Days</button>
-          <button type="button" onClick={() => handleQuickDuration(7)}>7 Days</button>
-        </div>
-
-        <div className="pdp-date-grid">
-          <div>
-            <label className="field-label">Start Date</label>
-            <DatePicker
-              selected={startDate}
-              onChange={(date) => {
-                setStartDate(date);
-                if (endDate && date > endDate) setEndDate(null);
-              }}
-              selectsStart
-              startDate={startDate}
-              endDate={endDate}
-              minDate={new Date()}
-              excludeDateIntervals={blockedIntervals}
-              className="date-input"
-              placeholderText="Select start date"
-              disabled={!isAvailable || submitting}
-            />
-          </div>
-
-          <div>
-            <label className="field-label">End Date</label>
-            <DatePicker
-              selected={endDate}
-              onChange={(date) => setEndDate(date)}
-              selectsEnd
-              startDate={startDate}
-              endDate={endDate}
-              minDate={startDate || new Date()}
-              excludeDateIntervals={blockedIntervals}
-              className="date-input"
-              placeholderText="Select end date"
-              disabled={!isAvailable || submitting}
-            />
-          </div>
-        </div>
-
-        <div className="pdp-summary">
-          <div>
-            <span>Total Days</span>
-            <strong>{totalDays}</strong>
-          </div>
-          <div>
-            <span>Subtotal</span>
-            <strong>Rs {totalPrice}</strong>
-          </div>
-          <div>
-            <span>Delivery + Care</span>
-            <strong>Included</strong>
-          </div>
-        </div>
-
-        <div className="pdp-selected-range">
-          <span>Selected</span>
-          <strong>
-            {startDate ? startDate.toLocaleDateString() : "--"} to {endDate ? endDate.toLocaleDateString() : "--"}
-          </strong>
-        </div>
-
-        <button className="rent-main-btn" disabled={!isAvailable || submitting} onClick={handleRent}>
-          {submitting ? "Placing Rental..." : isAvailable ? "Rent Now" : "Currently Unavailable"}
-        </button>
-        {bookingError && <p className="pdp-booking-error">{bookingError}</p>}
-
-        <button className="btn-outline w-full mt-2" onClick={handleAddToCart}>
-          Add to Cart
-        </button>
-        {cartMessage && <p className="pdp-cart-msg">{cartMessage}</p>}
-
-        <div className="pdp-policy">
-          <h4>Rental Policy</h4>
-          <p>Free cancellation up to 24 hours before delivery.</p>
-          <p>Late return charges apply after grace period.</p>
-          <p>Professional cleaning is included in rental fee.</p>
-        </div>
-
-        {isAdmin() && (
-          <div className="pdp-admin-row">
-            <button className="delete-product-btn" onClick={handleDelete}>
-              Delete Product
-            </button>
-            <div className="pdp-admin-note">Admin action: this is permanent.</div>
-          </div>
-        )}
-      </aside>
+        </aside>
+      </section>
 
       <div className="pdp-trust surface">
         <div>
@@ -404,6 +543,23 @@ function ClothDetails() {
           <p>Our team can help with fit and pairing before you checkout.</p>
         </div>
       </div>
+
+      <section className="pdp-card surface">
+        <h3 className="pdp-card-title">Current Bookings</h3>
+        {bookedDates.length === 0 ? (
+          <p className="muted">No active bookings for this item.</p>
+        ) : (
+          <div className="pdp-booked-list">
+            {bookedDates.map((slot, index) => (
+              <div key={`${slot.startDate}-${index}`} className="pdp-booked-row">
+                <span>{new Date(slot.startDate).toLocaleDateString()}</span>
+                <span>to</span>
+                <span>{new Date(slot.endDate).toLocaleDateString()}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
 
       <section className="pdp-reviews surface">
         <div className="pdp-reviews-head">

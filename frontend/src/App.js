@@ -13,6 +13,7 @@ import ClothDetails from "./pages/ClothDetails";
 import PrivateRoute from "./components/PrivateRoute";
 import AdminRoute from "./components/AdminRoute";
 import ProductDetails from "./pages/ProductDetails";
+import EditCloth from "./pages/EditCloth";
 
 
 
@@ -32,6 +33,7 @@ function App() {
           <Route path="/cart" element={<PrivateRoute><Cart /></PrivateRoute>} />
           <Route path="/my-rentals" element={<PrivateRoute><MyRentals /></PrivateRoute>} />
           <Route path="/admin" element={<AdminRoute><Admin /></AdminRoute>} />
+          <Route path="/admin/cloth/:id/edit" element={<AdminRoute><EditCloth /></AdminRoute>} />
         </Routes>
       </Layout>
     </BrowserRouter>

@@ -1,13 +1,23 @@
 import { useState, useEffect, useMemo } from "react";
+import { Link } from "react-router-dom";
 import api from "../services/api";
 import { fitProfiles } from "../config/fitProfiles";
 
 function Admin() {
   const [form, setForm] = useState({
     name: "",
+    description: "",
+    detailedDescription: "",
+    brand: "",
+    color: "",
+    fabric: "",
+    occasion: "",
+    careInstructions: "",
+    highlights: "",
     pricePerDay: "",
   });
   const [image, setImage] = useState(null);
+  const [galleryImages, setGalleryImages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -17,17 +27,23 @@ function Admin() {
   const [rentals, setRentals] = useState([]);
   const [rentalFilter, setRentalFilter] = useState("all");
   const [searchText, setSearchText] = useState("");
+  const [myProducts, setMyProducts] = useState([]);
 
   const imagePreview = useMemo(() => {
     if (!image) return "";
     return URL.createObjectURL(image);
   }, [image]);
+  const galleryPreviews = useMemo(
+    () => galleryImages.map((file) => URL.createObjectURL(file)),
+    [galleryImages]
+  );
 
   useEffect(() => {
     return () => {
       if (imagePreview) URL.revokeObjectURL(imagePreview);
+      galleryPreviews.forEach((url) => URL.revokeObjectURL(url));
     };
-  }, [imagePreview]);
+  }, [imagePreview, galleryPreviews]);
 
   const handleChange = (e) => {
     setForm((prev) => ({
@@ -45,8 +61,19 @@ function Admin() {
     }
   };
 
+  const fetchMyProducts = async () => {
+    try {
+      const res = await api.get("/clothes/mine");
+      const items = Array.isArray(res.data) ? res.data : res.data.items || [];
+      setMyProducts(items);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   useEffect(() => {
     fetchRentals();
+    fetchMyProducts();
   }, []);
 
   const handleAdd = async (e) => {
@@ -69,8 +96,17 @@ function Admin() {
 
     const formData = new FormData();
     formData.append("name", form.name.trim());
+    formData.append("description", form.description.trim());
+    formData.append("detailedDescription", form.detailedDescription.trim());
+    formData.append("brand", form.brand.trim());
+    formData.append("color", form.color.trim());
+    formData.append("fabric", form.fabric.trim());
+    formData.append("occasion", form.occasion.trim());
+    formData.append("careInstructions", form.careInstructions.trim());
+    formData.append("highlights", form.highlights.trim());
     formData.append("pricePerDay", form.pricePerDay);
     formData.append("image", image);
+    galleryImages.forEach((file) => formData.append("images", file));
     formData.append("type", type.trim());
     formData.append("fitProfile", fitProfile);
     formData.append("availableSizes", JSON.stringify(formattedSizes));
@@ -81,12 +117,25 @@ function Admin() {
       });
 
       setMessage("Product added successfully.");
-      setForm({ name: "", pricePerDay: "" });
+      setForm({
+        name: "",
+        description: "",
+        detailedDescription: "",
+        brand: "",
+        color: "",
+        fabric: "",
+        occasion: "",
+        careInstructions: "",
+        highlights: "",
+        pricePerDay: "",
+      });
       setImage(null);
+      setGalleryImages([]);
       setCurrentSize({});
       setType("");
       setFitProfile("");
       fetchRentals();
+      fetchMyProducts();
     } catch (err) {
       setError(err.response?.data?.message || "Failed to add product");
     } finally {
@@ -119,7 +168,7 @@ function Admin() {
         <section className="adminx-panel surface">
           <div className="adminx-head">
             <h2 className="title-serif text-3xl">Catalog Manager</h2>
-            <p>Create polished product listings with sizing and media.</p>
+            <p>Create product listings with full, blog-style detail.</p>
           </div>
 
           {message && <p className="msg-success">{message}</p>}
@@ -164,6 +213,101 @@ function Admin() {
                   required
                 />
               </div>
+            </div>
+
+            <div className="adminx-form-row">
+              <div className="form-field">
+                <label className="field-label">Brand</label>
+                <input
+                  className="field-input"
+                  name="brand"
+                  placeholder="Raymond"
+                  value={form.brand}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="form-field">
+                <label className="field-label">Color</label>
+                <input
+                  className="field-input"
+                  name="color"
+                  placeholder="Navy Blue"
+                  value={form.color}
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
+
+            <div className="adminx-form-row">
+              <div className="form-field">
+                <label className="field-label">Fabric</label>
+                <input
+                  className="field-input"
+                  name="fabric"
+                  placeholder="Silk Blend"
+                  value={form.fabric}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="form-field">
+                <label className="field-label">Best Occasion</label>
+                <input
+                  className="field-input"
+                  name="occasion"
+                  placeholder="Wedding, Reception"
+                  value={form.occasion}
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
+
+            <div className="form-field">
+              <label className="field-label">Short Description</label>
+              <textarea
+                className="field-input"
+                name="description"
+                rows="3"
+                placeholder="Quick summary about this outfit..."
+                value={form.description}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            <div className="form-field">
+              <label className="field-label">Detailed Description (Blog Style)</label>
+              <textarea
+                className="field-input"
+                name="detailedDescription"
+                rows="7"
+                placeholder="Write full long-form product story, styling notes, fit advice, etc."
+                value={form.detailedDescription}
+                onChange={handleChange}
+              />
+            </div>
+
+            <div className="form-field">
+              <label className="field-label">Highlights (one per line)</label>
+              <textarea
+                className="field-input"
+                name="highlights"
+                rows="4"
+                placeholder={"Premium finish\nOccasion ready\nComfort fit"}
+                value={form.highlights}
+                onChange={handleChange}
+              />
+            </div>
+
+            <div className="form-field">
+              <label className="field-label">Care Instructions</label>
+              <textarea
+                className="field-input"
+                name="careInstructions"
+                rows="3"
+                placeholder="Dry clean only. Steam before use..."
+                value={form.careInstructions}
+                onChange={handleChange}
+              />
             </div>
 
             <div className="form-field">
@@ -211,7 +355,7 @@ function Admin() {
             )}
 
             <div className="form-field">
-              <label className="field-label">Product Image</label>
+              <label className="field-label">Primary Product Image</label>
               <input
                 className="field-input"
                 type="file"
@@ -222,9 +366,28 @@ function Admin() {
               />
             </div>
 
+            <div className="form-field">
+              <label className="field-label">Additional Gallery Images</label>
+              <input
+                className="field-input"
+                type="file"
+                name="images"
+                accept="image/*"
+                multiple
+                onChange={(e) => setGalleryImages(Array.from(e.target.files || []))}
+              />
+            </div>
+
             {imagePreview && (
               <div className="adminx-preview">
                 <img src={imagePreview} alt="Preview" />
+              </div>
+            )}
+            {galleryPreviews.length > 0 && (
+              <div className="adminx-gallery-preview">
+                {galleryPreviews.map((src, idx) => (
+                  <img key={src} src={src} alt={`Gallery ${idx + 1}`} />
+                ))}
               </div>
             )}
 
@@ -232,6 +395,24 @@ function Admin() {
               {loading ? "Adding Product..." : "Add Product"}
             </button>
           </form>
+
+          <div className="adminx-my-products">
+            <h3 className="title-serif text-xl">My Products</h3>
+            {myProducts.length === 0 && <p className="muted">No products added by you yet.</p>}
+            <div className="adminx-my-products-list">
+              {myProducts.map((item) => (
+                <article key={item._id} className="adminx-my-product-card">
+                  <div>
+                    <h4>{item.name}</h4>
+                    <p>Rs {item.pricePerDay}/day</p>
+                  </div>
+                  <Link className="btn-outline" to={`/admin/cloth/${item._id}/edit`}>
+                    Edit
+                  </Link>
+                </article>
+              ))}
+            </div>
+          </div>
         </section>
 
         <section className="adminx-panel surface">
