@@ -30,7 +30,7 @@ function Productcard({ item, refreshClothes }) {
     <div className="product-card">
       <Link to={`/cloth/${item._id}`} className="product-media">
         <div className="product-image-wrapper">
-          <img src={`http://localhost:5000${cardImage}`} alt={item.name} loading="lazy" />
+          <img src={`https://clothify-wb4m.onrender.com${cloth.image}`} />
         </div>
 
         <span className={`product-badge ${statusInfo.className}`}>{statusInfo.label}</span>
