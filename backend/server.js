@@ -1,39 +1,71 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const app = express();
+const port = Number(process.env.PORT) || 5000;
+const allowedOrigins = new Set(
+  [
+    'http://localhost:3000',
+    process.env.FRONTEND_URL,
+    ...(process.env.CORS_ORIGINS || '')
+      .split(',')
+      .map((origin) => origin.trim())
+      .filter(Boolean)
+  ].filter(Boolean)
+);
 
-// Middleware
-app.use(cors());
+const isAllowedOrigin = (origin) => {
+  if (!origin) return true;
+  if (allowedOrigins.has(origin)) return true;
+
+  try {
+    const { hostname } = new URL(origin);
+    return hostname.endsWith('.vercel.app') || hostname.endsWith('.onrender.com');
+  } catch (error) {
+    return false;
+  }
+};
+
 app.use(express.json());
+app.use(
+  cors({
+    origin(origin, callback) {
+      if (isAllowedOrigin(origin)) {
+        return callback(null, true);
+      }
 
-// Serve uploaded images
-app.use("/uploads", express.static("uploads"));
+      return callback(new Error(`CORS blocked for origin: ${origin}`));
+    },
+    credentials: true
+  })
+);
 
-// Root route (fixes "Cannot GET /")
-app.get("/", (req, res) => {
-  res.send("Clothify Backend API is running 🚀");
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.get('/', (_req, res) => {
+  res.send('Clothify Backend API is running');
+});
+app.get('/api/health', (_req, res) => {
+  res.status(200).json({ status: 'ok' });
 });
 
-// Routes
+if (!process.env.MONGODB_URI) {
+  console.error('Missing MONGODB_URI environment variable.');
+  process.exit(1);
+}
+
+mongoose
+  .connect(process.env.MONGODB_URI)
+  .then(() => console.log('MongoDB Connected'))
+  .catch((err) => {
+    console.error('MongoDB connection error:', err.message);
+    process.exit(1);
+  });
+
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/clothes', require('./routes/clothRoutes'));
 app.use('/api/rentals', require('./routes/rentalRoutes'));
 
-// MongoDB connection
-mongoose.connect(process.env.MONGODB_URI)
-.then(() => {
-  console.log("MongoDB Connected");
-})
-.catch(err => {
-  console.log("MongoDB Connection Error:", err);
-});
-
-// Use Render port
-const PORT = process.env.PORT || 5000;
-
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+app.listen(port, () => console.log(`Server running on port ${port}`));
