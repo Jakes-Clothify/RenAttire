@@ -9,7 +9,7 @@ const api = axios.create({
   baseURL: API_BASE_URL,
 });
 
-// 🔥 Attach token automatically
+// Attach auth token automatically when available.
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
 

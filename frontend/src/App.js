@@ -8,6 +8,8 @@ import Signup from "./pages/Signup";
 import Login from "./pages/Login";
 import MyRentals from "./pages/MyRentals";
 import Admin from "./pages/Admin";
+import Wishlist from "./pages/Wishlist";
+import Profile from "./pages/Profile";
 
 import ClothDetails from "./pages/ClothDetails";
 import PrivateRoute from "./components/PrivateRoute";
@@ -31,6 +33,8 @@ function App() {
 
           <Route path="/cloth/:id" element={<ClothDetails />} />
           <Route path="/cart" element={<PrivateRoute><Cart /></PrivateRoute>} />
+          <Route path="/wishlist" element={<PrivateRoute><Wishlist /></PrivateRoute>} />
+          <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
           <Route path="/my-rentals" element={<PrivateRoute><MyRentals /></PrivateRoute>} />
           <Route path="/admin" element={<AdminRoute><Admin /></AdminRoute>} />
           <Route path="/admin/cloth/:id/edit" element={<AdminRoute><EditCloth /></AdminRoute>} />

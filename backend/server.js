@@ -45,7 +45,7 @@ app.use(
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.get('/', (_req, res) => {
-  res.send('Clothify Backend API is running');
+  res.send('RenAttire Backend API is running');
 });
 app.get('/api/health', (_req, res) => {
   res.status(200).json({ status: 'ok' });

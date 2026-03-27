@@ -3,22 +3,67 @@ import { useEffect, useState } from "react";
 import { getClothes } from "../services/clothService";
 import Productcard from "../components/Productcard";
 
+const heroSlides = [
+  {
+    kicker: "Wedding Season Edit",
+    title: "Rent statement looks for every ceremony without buying a full wardrobe.",
+    text: "Explore premium sherwanis, lehengas, gowns, and reception fits curated for modern event dressing.",
+    image: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1600&auto=format&fit=crop",
+    ctaLabel: "Shop Wedding Wear",
+    ctaLink: "/shop?occasion=Wedding",
+    secondaryLabel: "Browse Designers",
+    secondaryLink: "/shop?type=Sherwani",
+  },
+  {
+    kicker: "Party And Cocktail",
+    title: "Go from invite to outfit in minutes with premium rental styling.",
+    text: "Discover sleek cocktail edits, sharp formal layers, and occasion-first looks delivered ready to wear.",
+    image: "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?q=80&w=1600&auto=format&fit=crop",
+    ctaLabel: "Shop Party Looks",
+    ctaLink: "/shop?occasion=Party",
+    secondaryLabel: "View Trending",
+    secondaryLink: "/shop?sort=price_desc",
+  },
+  {
+    kicker: "Festive Rotation",
+    title: "Celebrate more, repeat less, and keep your wardrobe fresh all season.",
+    text: "Traditional and festive styles with fit support, verified cleaning, and straightforward returns.",
+    image: "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?q=80&w=1600&auto=format&fit=crop",
+    ctaLabel: "Explore Festive Wear",
+    ctaLink: "/shop?occasion=Festive",
+    secondaryLabel: "Get Started",
+    secondaryLink: "/signup",
+  },
+];
+
 const spotlightCards = [
   {
     title: "Wedding Luxe",
     subtitle: "Premium sherwani and lehenga edits",
-    image: "https://images.unsplash.com/photo-1610173826609-0f1c79f40a11?q=80&w=1400&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=1400&auto=format&fit=crop",
   },
   {
     title: "Party Edit",
     subtitle: "Modern fits for evening events",
-    image: "https://images.unsplash.com/photo-1520975916090-3105956dac38?q=80&w=1400&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?q=80&w=1400&auto=format&fit=crop",
   },
   {
     title: "Festive Classic",
     subtitle: "Traditional wear with modern comfort",
-    image: "https://images.unsplash.com/photo-1585487000160-6ebcfceb0d03?q=80&w=1400&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=1400&auto=format&fit=crop",
   },
+  {
+    title: "Reception Select",
+    subtitle: "Polished evening looks for grand celebrations",
+    image: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?q=80&w=1400&auto=format&fit=crop",
+  },
+];
+
+const categoryTiles = [
+  { label: "Sherwani", meta: "Groom and reception picks", image: "https://images.unsplash.com/photo-1621184455862-c163dfb30e0f?q=80&w=1000&auto=format&fit=crop", link: "/shop?type=Sherwani" },
+  { label: "Lehenga", meta: "Wedding and sangeet edits", image: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?q=80&w=1000&auto=format&fit=crop", link: "/shop?occasion=Wedding" },
+  { label: "Party Wear", meta: "Cocktail and evening styles", image: "https://images.unsplash.com/photo-1496747611176-843222e1e57c?q=80&w=1000&auto=format&fit=crop", link: "/shop?occasion=Party" },
+  { label: "Festive", meta: "Modern traditional rotation", image: "https://images.unsplash.com/photo-1619472234083-25e6f2b8cb35?q=80&w=1000&auto=format&fit=crop", link: "/shop?occasion=Festive" },
 ];
 
 const valueProps = [
@@ -27,7 +72,6 @@ const valueProps = [
   { heading: "Fast Rental Workflow", text: "Book online in minutes with straightforward pickup and return process." },
 ];
 
-const chips = ["Wedding", "Cocktail", "Ethnic", "Formal", "Designer", "Weekend"];
 const trustStats = [
   { value: "98%", label: "On-time deliveries" },
   { value: "12K+", label: "Orders fulfilled" },
@@ -38,6 +82,7 @@ const trustStats = [
 function HomeLanding() {
   const [trending, setTrending] = useState([]);
   const [loadingTrending, setLoadingTrending] = useState(true);
+  const [activeSlide, setActiveSlide] = useState(0);
 
   useEffect(() => {
     const loadTrending = async () => {
@@ -55,6 +100,16 @@ function HomeLanding() {
     loadTrending();
   }, []);
 
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setActiveSlide((current) => (current + 1) % heroSlides.length);
+    }, 5000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  const currentSlide = heroSlides[activeSlide];
+
   return (
     <div className="mixhome">
       <section className="mixhome-promo">
@@ -62,17 +117,27 @@ function HomeLanding() {
         <p>Get up to 20% off on your first rental booking this week.</p>
       </section>
 
-      <section className="mixhome-hero">
-        <div className="mixhome-hero-left">
-          <p className="mixhome-kicker">Curated Rental Marketplace</p>
-          <h1 className="title-serif">Discover, reserve, and wear premium fashion like it is your own closet.</h1>
-          <p className="mixhome-sub">
-            A modern rental experience combining discovery-first shopping, occasion curation, and premium service quality.
-          </p>
+      <section className="mixhome-carousel">
+        <div className="mixhome-carousel-media">
+          <img
+            src={currentSlide.image}
+            alt={currentSlide.title}
+            onError={(event) => {
+              event.currentTarget.onerror = null;
+              event.currentTarget.src = "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1600&auto=format&fit=crop";
+            }}
+          />
+          <div className="mixhome-carousel-overlay" />
+        </div>
+
+        <div className="mixhome-carousel-content">
+          <p className="mixhome-kicker">{currentSlide.kicker}</p>
+          <h1 className="title-serif">{currentSlide.title}</h1>
+          <p className="mixhome-sub">{currentSlide.text}</p>
 
           <div className="mixhome-hero-actions">
-            <Link to="/shop" className="btn-brand">Shop Collection</Link>
-            <Link to="/signup" className="btn-outline">Get Started</Link>
+            <Link to={currentSlide.ctaLink} className="btn-brand">{currentSlide.ctaLabel}</Link>
+            <Link to={currentSlide.secondaryLink} className="btn-outline">{currentSlide.secondaryLabel}</Link>
           </div>
 
           <div className="mixhome-metrics">
@@ -80,53 +145,39 @@ function HomeLanding() {
             <article><strong>4.9/5</strong><span>User Rating</span></article>
             <article><strong>48h</strong><span>Avg Fulfillment</span></article>
           </div>
-        </div>
 
-        <div className="mixhome-hero-right">
-          <img
-            src="https://images.unsplash.com/photo-1593032465175-481ac7f401a0?q=80&w=1600&auto=format&fit=crop"
-            alt="Premium rental fashion visual"
-          />
-          <div className="mixhome-float-tag">
-            <span>Most Booked</span>
-            <strong>Reception Collection</strong>
+          <div className="mixhome-carousel-dots">
+            {heroSlides.map((slide, index) => (
+              <button
+                key={slide.title}
+                type="button"
+                className={index === activeSlide ? "active" : ""}
+                onClick={() => setActiveSlide(index)}
+                aria-label={`Show slide ${index + 1}`}
+              />
+            ))}
           </div>
         </div>
       </section>
 
-      <section className="mixhome-chip-row">
-        {chips.map((chip) => (
-          <Link key={chip} to="/shop">{chip}</Link>
+      <section className="mixhome-category-grid">
+        {categoryTiles.map((tile) => (
+          <Link key={tile.label} to={tile.link} className="mixhome-category-tile">
+            <img
+              src={tile.image}
+              alt={tile.label}
+              loading="lazy"
+              onError={(event) => {
+                event.currentTarget.onerror = null;
+                event.currentTarget.src = "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?q=80&w=1000&auto=format&fit=crop";
+              }}
+            />
+            <div>
+              <strong>{tile.label}</strong>
+              <span>{tile.meta}</span>
+            </div>
+          </Link>
         ))}
-      </section>
-
-      <section className="mixhome-editorial">
-        <article className="mixhome-editorial-copy">
-          <p className="mixhome-kicker">Editor’s Pick</p>
-          <h2 className="title-serif">The Rental Wardrobe That Adapts To Your Calendar</h2>
-          <p>
-            From engagement evenings to reception nights and office celebrations, build a rotation of standout outfits
-            without accumulating one-time purchases.
-          </p>
-          <ul>
-            <li>Curated outfit drops every week</li>
-            <li>Fit-profile based filtering</li>
-            <li>Professional cleaning and prep included</li>
-          </ul>
-          <Link to="/shop" className="btn-brand">View Editor Collection</Link>
-        </article>
-
-        <article className="mixhome-editorial-media">
-          <img
-            src="https://images.unsplash.com/photo-1464863979621-258859e62245?q=80&w=1400&auto=format&fit=crop"
-            alt="Editorial fashion rental showcase"
-            loading="lazy"
-          />
-          <div className="mixhome-editorial-badge">
-            <span>Style Intel</span>
-            <strong>Most saved look this month</strong>
-          </div>
-        </article>
       </section>
 
       <section className="mixhome-proof">
@@ -147,7 +198,15 @@ function HomeLanding() {
         <div className="mixhome-spotlight-grid">
           {spotlightCards.map((card) => (
             <article className="mixhome-spotlight-card" key={card.title}>
-              <img src={card.image} alt={card.title} loading="lazy" />
+              <img
+                src={card.image}
+                alt={card.title}
+                loading="lazy"
+                onError={(event) => {
+                  event.currentTarget.onerror = null;
+                  event.currentTarget.src = "https://images.unsplash.com/photo-1603252109303-2751441dd157?q=80&w=1400&auto=format&fit=crop";
+                }}
+              />
               <div className="mixhome-spotlight-overlay">
                 <h3>{card.title}</h3>
                 <p>{card.subtitle}</p>

@@ -49,6 +49,8 @@ exports.createRental = async (req, res) => {
       status: "active",
     });
 
+    await Clothes.findByIdAndUpdate(clothesId, { available: false });
+
     res.status(201).json(rental);
   } catch (err) {
     console.error("RENTAL ERROR:", err);
@@ -74,35 +76,54 @@ exports.checkoutCart = async (req, res) => {
       return res.status(400).json({ message: "One or more items are invalid" });
     }
 
-    const activeRentals = await Rental.find({
-      clothesId: { $in: uniqueClothIds },
-      status: { $ne: "returned" },
-    }).select("clothesId");
-
-    if (activeRentals.length > 0) {
-      return res.status(400).json({ message: "One or more items are already rented" });
-    }
-
     const orderId = createOrderId();
-    const startDate = new Date();
+    const rentalPayload = [];
 
-    const rentalPayload = cartItems.map((item) => {
+    for (const item of cartItems) {
       const cloth = clothMap.get(String(item.clothesId));
-      const days = Math.max(1, Number(item.rentalDays) || 1);
+      const providedStart = item.startDate ? new Date(item.startDate) : new Date();
+      const providedEnd = item.endDate ? new Date(item.endDate) : null;
 
-      const endDate = new Date(startDate);
-      endDate.setDate(endDate.getDate() + days);
+      if (Number.isNaN(providedStart.getTime())) {
+        return res.status(400).json({ message: "Invalid start date in cart" });
+      }
 
-      return {
+      let startDate = new Date(providedStart);
+      let endDate = providedEnd && !Number.isNaN(providedEnd.getTime()) ? new Date(providedEnd) : new Date(providedStart);
+      if (!providedEnd) {
+        endDate.setDate(endDate.getDate() + Math.max(1, Number(item.rentalDays) || 1));
+      }
+
+      if (startDate >= endDate) {
+        return res.status(400).json({ message: "Invalid date range in cart" });
+      }
+
+      const conflict = await Rental.findOne({
+        clothesId: cloth._id,
+        status: { $ne: "returned" },
+        startDate: { $lte: endDate },
+        endDate: { $gte: startDate },
+      }).select("_id");
+
+      if (conflict) {
+        return res.status(400).json({ message: `${cloth.name} is already booked for the selected dates` });
+      }
+
+      const rentalDays = Math.max(
+        1,
+        Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24))
+      );
+
+      rentalPayload.push({
         orderId,
         userId: req.user._id,
         clothesId: cloth._id,
-        rentalDays: days,
-        totalPrice: cloth.pricePerDay * days,
+        rentalDays,
+        totalPrice: cloth.pricePerDay * rentalDays,
         startDate,
         endDate,
-      };
-    });
+      });
+    }
 
     const rentals = await Rental.insertMany(rentalPayload);
 
@@ -142,7 +163,13 @@ exports.returnCloth = async (req, res) => {
     rental.status = "returned";
     await rental.save();
 
-    await Clothes.findByIdAndUpdate(rental.clothesId, { available: true });
+    const remainingActiveRental = await Rental.findOne({
+      clothesId: rental.clothesId,
+      status: { $ne: "returned" },
+      _id: { $ne: rental._id },
+    }).select("_id");
+
+    await Clothes.findByIdAndUpdate(rental.clothesId, { available: !remainingActiveRental });
 
     res.json({ message: "Returned successfully" });
   } catch (err) {

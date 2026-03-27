@@ -36,7 +36,7 @@ return (
   <div className="auth-page">
     <div className="form-panel">
       <h2 className="title-serif text-3xl">Create Account</h2>
-      <p className="text-gray-600 mt-1">Start your rental journey with Clothify.</p>
+      <p className="text-gray-600 mt-1">Start your rental journey with RenAttire.</p>
 
       {error && <p className="msg-error">{error}</p>}
 

@@ -57,7 +57,7 @@ function Login() {
       </form>
 
       <p className="auth-footer">
-        New to Clothify? <Link to="/signup" className="auth-link">Create account</Link>
+        New to RenAttire? <Link to="/signup" className="auth-link">Create account</Link>
       </p>
     </div>
   </div>

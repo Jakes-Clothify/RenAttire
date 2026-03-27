@@ -42,12 +42,23 @@ const parseImageOrder = (raw) => {
 };
 
 exports.getAll = async (req, res) => {
-  const { q, maxPrice, size, sort, page, limit } = req.query;
+  const { q, maxPrice, size, sort, page, limit, available, type, occasion, fitProfile } = req.query;
 
   const filter = {};
   let sortOption = { _id: -1 };
 
-  if (q) filter.name = { $regex: q, $options: 'i' };
+  if (q) {
+    const regex = { $regex: q, $options: 'i' };
+    filter.$or = [
+      { name: regex },
+      { description: regex },
+      { brand: regex },
+      { color: regex },
+      { fabric: regex },
+      { occasion: regex },
+      { type: regex },
+    ];
+  }
 
   if (maxPrice !== undefined && maxPrice !== '') {
     const maxPriceNumber = Number(maxPrice);
@@ -59,6 +70,10 @@ exports.getAll = async (req, res) => {
   if (size) {
     filter[`availableSizes.measurements.${size}`] = { $exists: true };
   }
+  if (type) filter.type = { $regex: `^${String(type).trim()}$`, $options: 'i' };
+  if (occasion) filter.occasion = { $regex: occasion, $options: 'i' };
+  if (fitProfile) filter.fitProfile = fitProfile;
+  if (String(available).toLowerCase() === "true") filter.available = true;
 
   if (sort === 'price_asc') sortOption = { pricePerDay: 1 };
   else if (sort === 'price_desc') sortOption = { pricePerDay: -1 };
@@ -69,7 +84,7 @@ exports.getAll = async (req, res) => {
   const limitNumber = Math.min(50, Math.max(1, Number(limit) || 9));
   const skip = (pageNumber - 1) * limitNumber;
 
-  const [clothes, total] = await Promise.all([
+  const [clothes, rawTotal] = await Promise.all([
     Clothes.find(filter).sort(sortOption).skip(skip).limit(limitNumber),
     Clothes.countDocuments(filter),
   ]);
@@ -116,6 +131,7 @@ exports.getAll = async (req, res) => {
     };
   });
 
+  const total = rawTotal;
   const totalPages = Math.max(1, Math.ceil(total / limitNumber));
 
   res.json({

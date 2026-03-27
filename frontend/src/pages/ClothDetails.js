@@ -1,12 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import api from "../services/api";
 import { rentCloth } from "../services/rentalService";
 import { addToCart } from "../features/cartSlice";
+import { toggleWishlistLocal } from "../features/wishlistSlice";
+import { toggleWishlist } from "../services/authService";
 import { resolveMediaUrl, resolvePrimaryImage } from "../utils/media";
+import { isLoggedIn } from "../utils/auth";
 
 const fitHighlights = {
   upper: ["Tailored upper silhouette", "Shoulder and chest fit optimized", "Best for formal layering"],
@@ -16,10 +19,29 @@ const fitHighlights = {
   free: ["Flexible fit profile", "Easy to style for occasions", "No strict measurement dependency"],
 };
 
+const REVIEW_STORAGE_KEY = "renattire_reviews";
+const seedReviews = [
+  {
+    id: "r1",
+    name: "Anita S",
+    rating: 5,
+    comment: "Fabric quality was excellent and fit was exactly as shown.",
+    when: "2 days ago",
+  },
+  {
+    id: "r2",
+    name: "Rahul K",
+    rating: 4,
+    comment: "Smooth delivery and pickup. Styling support was helpful.",
+    when: "1 week ago",
+  },
+];
+
 function ClothDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const wishlist = useSelector((state) => state.wishlist);
 
   const [cloth, setCloth] = useState(null);
   const [bookedDates, setBookedDates] = useState([]);
@@ -31,22 +53,7 @@ function ClothDetails() {
   const [submitting, setSubmitting] = useState(false);
   const [cartMessage, setCartMessage] = useState("");
   const [bookingError, setBookingError] = useState("");
-  const [reviews, setReviews] = useState([
-    {
-      id: "r1",
-      name: "Anita S",
-      rating: 5,
-      comment: "Fabric quality was excellent and fit was exactly as shown.",
-      when: "2 days ago",
-    },
-    {
-      id: "r2",
-      name: "Rahul K",
-      rating: 4,
-      comment: "Smooth delivery and pickup. Styling support was helpful.",
-      when: "1 week ago",
-    },
-  ]);
+  const [reviews, setReviews] = useState(seedReviews);
   const [reviewForm, setReviewForm] = useState({
     name: "",
     rating: 5,
@@ -64,6 +71,28 @@ function ClothDetails() {
     }
   };
   const currentUser = getCurrentUser();
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(`${REVIEW_STORAGE_KEY}:${id}`);
+      if (!raw) {
+        setReviews(seedReviews);
+        return;
+      }
+      const parsed = JSON.parse(raw);
+      setReviews(Array.isArray(parsed) && parsed.length ? parsed : seedReviews);
+    } catch {
+      setReviews(seedReviews);
+    }
+  }, [id]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(`${REVIEW_STORAGE_KEY}:${id}`, JSON.stringify(reviews));
+    } catch {
+      // Ignore storage write failures and keep reviews in memory.
+    }
+  }, [id, reviews]);
 
   useEffect(() => {
     const loadPage = async () => {
@@ -198,9 +227,36 @@ function ClothDetails() {
   };
 
   const handleAddToCart = () => {
-    dispatch(addToCart(cloth));
-    setCartMessage("Added to cart");
+    const defaultStart = new Date();
+    defaultStart.setHours(0, 0, 0, 0);
+    defaultStart.setDate(defaultStart.getDate() + 1);
+
+    const start = startDate || defaultStart;
+    const end = endDate || new Date(start.getTime() + 2 * 24 * 60 * 60 * 1000);
+
+    dispatch(addToCart({
+      ...cloth,
+      startDate: start.toISOString(),
+      endDate: end.toISOString(),
+      rentalDays: Math.max(1, totalDays || 2),
+    }));
+    setCartMessage("Added to cart with rental dates");
     setTimeout(() => setCartMessage(""), 1600);
+  };
+
+  const handleToggleWishlist = async () => {
+    if (!cloth) return;
+    if (!isLoggedIn()) {
+      navigate("/login");
+      return;
+    }
+
+    dispatch(toggleWishlistLocal(cloth));
+    try {
+      await toggleWishlist(cloth._id);
+    } catch {
+      dispatch(toggleWishlistLocal(cloth));
+    }
   };
 
   const handleDelete = async () => {
@@ -248,6 +304,7 @@ function ClothDetails() {
   const activeImage = selectedImage || galleryImages[0] || cloth.image;
   const activeIndex = Math.max(0, galleryImages.findIndex((img) => img === activeImage));
   const canSlide = galleryImages.length > 1;
+  const isSaved = wishlist.some((item) => item._id === cloth?._id);
   const goToPrevImage = () => {
     if (!canSlide) return;
     const nextIndex = (activeIndex - 1 + galleryImages.length) % galleryImages.length;
@@ -506,6 +563,9 @@ function ClothDetails() {
 
           <button className="btn-outline w-full mt-2" onClick={handleAddToCart}>
             Add to Cart
+          </button>
+          <button className="btn-outline w-full mt-2" onClick={handleToggleWishlist}>
+            {isSaved ? "Remove from Wishlist" : "Save to Wishlist"}
           </button>
           {cartMessage && <p className="pdp-cart-msg">{cartMessage}</p>}
 
