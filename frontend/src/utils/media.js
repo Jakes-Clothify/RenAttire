@@ -1,7 +1,6 @@
-const rawApiUrl = process.env.REACT_APP_API_URL || "http://localhost:5000";
-const API_BASE_URL = rawApiUrl.replace(/\/+$/, "").endsWith("/api")
-  ? rawApiUrl.replace(/\/+$/, "")
-  : `${rawApiUrl.replace(/\/+$/, "")}/api`;
+import { getApiBaseUrl } from "../config/apiBaseUrl";
+
+const API_BASE_URL = getApiBaseUrl();
 
 const BACKEND_ORIGIN = API_BASE_URL.replace(/\/api\/?$/, "");
 const FALLBACK_IMAGE = "/logo192.png";

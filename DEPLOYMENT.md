@@ -23,7 +23,7 @@ Set these in Render for the backend service:
 
 - `MONGODB_URI` = your MongoDB connection string
 - `JWT_SECRET` = a long random secret
-- `FRONTEND_URL` = your Vercel frontend URL, for example `https://your-app.vercel.app`
+- `FRONTEND_URL` = `https://renattire.vercel.app`
 - `CORS_ORIGINS` = optional extra allowed origins, comma-separated
 - `PORT` is provided by Render automatically
 
@@ -35,12 +35,12 @@ Render is already configured to use:
 
 After deploy, your backend URL will look like:
 
-- `https://your-backend-name.onrender.com`
+- `https://renattire.onrender.com`
 
 Test these:
 
-- `https://your-backend-name.onrender.com/`
-- `https://your-backend-name.onrender.com/api/health`
+- `https://renattire.onrender.com/`
+- `https://renattire.onrender.com/api/health`
 
 ## 2. Deploy the frontend to Vercel
 
@@ -57,7 +57,7 @@ This repo already includes a root-level [`vercel.json`](C:/Users/ACER/Documents/
 
 Add this in Vercel:
 
-- `REACT_APP_API_URL` = your Render backend URL, for example `https://your-backend-name.onrender.com`
+- `REACT_APP_API_URL` = `https://renattire.onrender.com`
 
 Do not add `/api` at the end. The frontend already appends it automatically.
 
