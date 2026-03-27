@@ -18,7 +18,7 @@
 
   html,
   body {
-    overflow-x: auto;
+    overflow-x: hidden;
     overflow-y: auto;
     font-family: "Manrope", sans-serif;
     color: var(--ink);
@@ -28,6 +28,12 @@
       radial-gradient(circle at 88% 0%, rgba(15, 138, 120, 0.15), transparent 34%),
       linear-gradient(180deg, #fbfaf7 0%, var(--bg) 62%);
     min-height: 100vh;
+  }
+
+  #root {
+    min-height: 100vh;
+    width: 100%;
+    overflow-x: hidden;
   }
 }
 
@@ -2892,11 +2898,42 @@
 
 @media (max-width: 767px) {
   html,
-  body {
+  body,
+  #root {
     overflow-x: hidden;
+    width: 100%;
+    max-width: 100%;
   }
 
   img {
+    max-width: 100%;
+  }
+
+  main,
+  section,
+  article,
+  aside,
+  form,
+  .surface,
+  .page-header,
+  .split-header,
+  .empty-state,
+  .rental-card,
+  .shopx-hero,
+  .shopx-quick-filters,
+  .shopx-sidebar,
+  .shopx-results,
+  .shopx-grid > *,
+  .mixhome > *,
+  .mixhome-category-tile,
+  .mixhome-spotlight-card,
+  .mixhome-value-card,
+  .pdp-page > *,
+  .pdp-amz-main > *,
+  .pdp-review-card,
+  .pdp-mini-card,
+  .adminx-panel {
+    min-width: 0;
     max-width: 100%;
   }
 
@@ -2935,6 +2972,12 @@
   .brand-title {
     min-width: 0;
     gap: 0.75rem;
+  }
+
+  .header-inner > *,
+  .navbar,
+  .navbar-secondary {
+    min-width: 0;
   }
 
   .brand-mark {
@@ -3078,6 +3121,7 @@
     padding-left: 0.2rem;
     padding-right: 0.2rem;
     scroll-snap-type: x proximity;
+    overflow-y: hidden;
   }
 
   .mixhome-trending-item {
@@ -3143,6 +3187,16 @@
   .shopx-results-bar {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .shopx-results-bar p,
+  .shopx-results-bar span,
+  .rental-meta p,
+  .pdp-booked-row span,
+  .pdp-review-card p,
+  .pdp-selected-range strong {
+    overflow-wrap: anywhere;
+    word-break: break-word;
   }
 
   .shopx-grid {
@@ -3306,6 +3360,14 @@
     min-width: 0;
   }
 
+  .pdp-mini-card div,
+  .pdp-review-form,
+  .pdp-review-list,
+  .rental-meta,
+  .mixhome-promo p {
+    min-width: 0;
+  }
+
   .pdp-mini-card img {
     height: 88px;
     object-fit: contain;
@@ -3320,6 +3382,15 @@
 }
 
 @media (max-width: 479px) {
+  .header-inner {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .header-menu-btn {
+    justify-self: stretch;
+    width: 100%;
+  }
+
   .page-shell {
     padding-left: 0.75rem;
     padding-right: 0.75rem;
