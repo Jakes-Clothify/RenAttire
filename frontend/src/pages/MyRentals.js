@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { clearHistory, getMyRentals, returnRental } from "../services/rentalService";
+import { resolveMediaUrl, resolvePrimaryImage } from "../utils/media";
 
 function MyRentals() {
   const [rentals, setRentals] = useState([]);
@@ -80,27 +82,42 @@ function MyRentals() {
       )}
 
       {rentals.map((r) => (
-        <div key={r._id} className="rental-card">
-          <h3 className="text-xl font-semibold text-gray-900">
-            {r.clothesId?.name}
-          </h3>
+        <div key={r._id} className="rental-card rental-product-card">
+          <Link to={`/cloth/${r.clothesId?._id || ""}`} className="rental-card-media">
+            <img
+              src={resolveMediaUrl(resolvePrimaryImage(r.clothesId))}
+              alt={r.clothesId?.name || "Rental item"}
+              loading="lazy"
+            />
+          </Link>
 
-          <div className="rental-meta">
-            <p>Order ID: {r.orderId || "-"}</p>
-            <p>Days: {r.rentalDays}</p>
-            <p>Total: Rs {r.totalPrice}</p>
-            <p>Start: {r.startDate ? new Date(r.startDate).toLocaleDateString() : "-"}</p>
-            <p>End: {r.endDate ? new Date(r.endDate).toLocaleDateString() : "-"}</p>
-            <p>
-              Status:
-              <span className={getStatusClass(r.status)}>
-                {r.status}
-              </span>
-            </p>
+          <div className="rental-card-body">
+            <div className="rental-card-copy">
+              <p className="cart-card-kicker">Order {r.orderId || "-"}</p>
+              <Link to={`/cloth/${r.clothesId?._id || ""}`} className="cart-card-title">
+                {r.clothesId?.name || "Rental item"}
+              </Link>
+              <p className="cart-card-price">Rs {r.totalPrice}</p>
+              <p className="cart-card-subtle">
+                {r.startDate ? new Date(r.startDate).toLocaleDateString() : "-"} to{" "}
+                {r.endDate ? new Date(r.endDate).toLocaleDateString() : "-"}
+              </p>
+            </div>
+
+            <div className="rental-meta rental-meta-grid">
+              <p>Days: {r.rentalDays}</p>
+              <p>Total: Rs {r.totalPrice}</p>
+              <p>
+                Status:
+                <span className={getStatusClass(r.status)}>
+                  {r.status}
+                </span>
+              </p>
+            </div>
           </div>
 
           {r.status !== "returned" && (
-            <div className="rental-actions">
+            <div className="rental-actions rental-card-actions">
               <button onClick={() => handleReturn(r._id)} className="btn-brand">
                 Return
               </button>

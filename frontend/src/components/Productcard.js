@@ -13,8 +13,22 @@ function Productcard({ item, refreshClothes }) {
   const isSaved = wishlist.some((wishlistItem) => wishlistItem._id === item._id);
 
   const handleRent = async () => {
-    navigate(`/cloth/${item._id}`);
-    refreshClothes();
+    const start = new Date();
+    start.setHours(0, 0, 0, 0);
+    start.setDate(start.getDate() + 1);
+
+    const end = new Date(start);
+    end.setDate(end.getDate() + 2);
+
+    dispatch(addToCart({
+      ...item,
+      startDate: start.toISOString(),
+      endDate: end.toISOString(),
+      rentalDays: 2,
+    }));
+
+    navigate("/payment");
+    refreshClothes?.();
   };
 
   const handleAddToCart = () => {

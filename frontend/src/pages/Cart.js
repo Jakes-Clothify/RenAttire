@@ -1,14 +1,14 @@
 import { useSelector, useDispatch } from 'react-redux';
 import { useMemo, useState } from 'react';
-import { checkoutCart } from '../services/rentalService';
-import { clearCart, removeFromCart, updateRentalDays, updateRentalWindow } from '../features/cartSlice';
+import { Link, useNavigate } from 'react-router-dom';
+import { removeFromCart, updateRentalDays, updateRentalWindow } from '../features/cartSlice';
+import { resolveMediaUrl, resolvePrimaryImage } from '../utils/media';
 
 function Cart() {
   const cart = useSelector((state) => state.cart);
   const dispatch = useDispatch();
-  const [placingOrder, setPlacingOrder] = useState(false);
+  const navigate = useNavigate();
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
 
   const total = useMemo(() => cart.reduce((sum, item) => {
     const days = Math.max(1, Number(item.rentalDays) || 1);
@@ -26,7 +26,7 @@ function Cart() {
     }));
   };
 
-  const handlePlaceOrder = async () => {
+  const handleContinueToPayment = () => {
     if (cart.length === 0) return;
 
     const missingDates = cart.find((item) => !item.startDate || !item.endDate);
@@ -35,26 +35,8 @@ function Cart() {
       return;
     }
 
-    setPlacingOrder(true);
     setError('');
-    setSuccess('');
-
-    try {
-      const payload = cart.map((item) => ({
-        clothesId: item._id,
-        rentalDays: Math.max(1, Number(item.rentalDays) || 1),
-        startDate: item.startDate,
-        endDate: item.endDate,
-      }));
-
-      const res = await checkoutCart(payload);
-      dispatch(clearCart());
-      setSuccess(`Order placed successfully. Order ID: ${res.data.orderId}`);
-    } catch (err) {
-      setError(err.response?.data?.message || 'Unable to place order');
-    } finally {
-      setPlacingOrder(false);
-    }
+    navigate('/payment');
   };
 
   return (
@@ -65,17 +47,33 @@ function Cart() {
       </div>
 
       {error && <p className="msg-error">{error}</p>}
-      {success && <p className="msg-success">{success}</p>}
 
       {cart.length === 0 && (
         <div className="surface p-6 text-gray-600">Your cart is empty.</div>
       )}
 
       {cart.map((item) => (
-        <div key={item._id} className="cart-row">
-          <div className="cart-info">
-            <p className="font-semibold text-gray-900">{item.name}</p>
-            <p className="text-sm text-gray-600">Rs {item.pricePerDay}/day</p>
+        <div key={item._id} className="cart-card">
+          <Link to={`/cloth/${item._id}`} className="cart-card-media">
+            <img
+              src={resolveMediaUrl(resolvePrimaryImage(item))}
+              alt={item.name}
+              loading="lazy"
+            />
+          </Link>
+
+          <div className="cart-card-body">
+            <div className="cart-card-copy">
+              <p className="cart-card-kicker">{item.type || 'Rental item'}</p>
+              <Link to={`/cloth/${item._id}`} className="cart-card-title">
+                {item.name}
+              </Link>
+              <p className="cart-card-price">Rs {item.pricePerDay}/day</p>
+              <p className="cart-card-subtle">
+                {Math.max(1, Number(item.rentalDays) || 1)} day plan selected
+              </p>
+            </div>
+
             <div className="cart-date-grid">
               <div>
                 <label className="field-label">Start</label>
@@ -98,15 +96,24 @@ function Cart() {
             </div>
           </div>
 
-          <div className="cart-controls">
-            <label className="text-sm">Days</label>
-            <input
-              type="number"
-              min="1"
-              value={item.rentalDays}
-              onChange={(e) => dispatch(updateRentalDays({ id: item._id, rentalDays: e.target.value }))}
-              className="qty-input"
-            />
+          <div className="cart-card-side">
+            <div className="cart-card-stat">
+              <label className="text-sm font-semibold text-gray-700">Days</label>
+              <input
+                type="number"
+                min="1"
+                value={item.rentalDays}
+                onChange={(e) => dispatch(updateRentalDays({ id: item._id, rentalDays: e.target.value }))}
+                className="qty-input"
+              />
+            </div>
+
+            <div className="cart-card-stat">
+              <span className="text-sm text-gray-500">Subtotal</span>
+              <strong className="text-gray-900">
+                Rs {item.pricePerDay * Math.max(1, Number(item.rentalDays) || 1)}
+              </strong>
+            </div>
 
             <button
               onClick={() => dispatch(removeFromCart(item._id))}
@@ -123,8 +130,8 @@ function Cart() {
           <p className="font-bold text-lg">Total: Rs {total}</p>
           <p className="text-sm text-gray-600">Delivery, pickup, and cleaning are included.</p>
         </div>
-        <button onClick={handlePlaceOrder} disabled={placingOrder || cart.length === 0} className="btn-brand">
-          {placingOrder ? 'Placing Order...' : 'Place Order'}
+        <button onClick={handleContinueToPayment} disabled={cart.length === 0} className="btn-brand">
+          Continue to Payment
         </button>
       </div>
     </div>

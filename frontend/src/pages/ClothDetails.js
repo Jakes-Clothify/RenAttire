@@ -4,7 +4,6 @@ import { useDispatch, useSelector } from "react-redux";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import api from "../services/api";
-import { rentCloth } from "../services/rentalService";
 import { addToCart } from "../features/cartSlice";
 import { toggleWishlistLocal } from "../features/wishlistSlice";
 import { toggleWishlist } from "../services/authService";
@@ -203,11 +202,15 @@ function ClothDetails() {
 
     setSubmitting(true);
     try {
-      await rentCloth(cloth._id, startDate.toISOString(), endDate.toISOString());
-      alert("Rental successful");
-      navigate("/my-rentals");
-    } catch (err) {
-      setBookingError(err.response?.data?.message || "Rent failed");
+      dispatch(addToCart({
+        ...cloth,
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString(),
+        rentalDays: Math.max(1, totalDays),
+      }));
+      navigate("/payment");
+    } catch {
+      setBookingError("Unable to continue to payment.");
     } finally {
       setSubmitting(false);
     }

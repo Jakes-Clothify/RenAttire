@@ -4,6 +4,7 @@ import Layout from "./components/Layout";
 import HomeLanding from "./pages/HomeLanding";
 import Shop from "./pages/Shop";
 import Cart from "./pages/Cart";
+import Payment from "./pages/Payment";
 import Signup from "./pages/Signup";
 import Login from "./pages/Login";
 import MyRentals from "./pages/MyRentals";
@@ -33,6 +34,7 @@ function App() {
 
           <Route path="/cloth/:id" element={<ClothDetails />} />
           <Route path="/cart" element={<PrivateRoute><Cart /></PrivateRoute>} />
+          <Route path="/payment" element={<PrivateRoute><Payment /></PrivateRoute>} />
           <Route path="/wishlist" element={<PrivateRoute><Wishlist /></PrivateRoute>} />
           <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
           <Route path="/my-rentals" element={<PrivateRoute><MyRentals /></PrivateRoute>} />
