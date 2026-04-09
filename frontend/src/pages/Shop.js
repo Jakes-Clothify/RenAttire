@@ -12,6 +12,24 @@ const quickFilters = [
   { label: "Designer", sort: "price_desc" },
 ];
 
+const mobileSortOptions = [
+  { label: "Recommended", value: "newest" },
+  { label: "Price Low", value: "price_asc" },
+  { label: "Price High", value: "price_desc" },
+  { label: "A to Z", value: "name_asc" },
+];
+
+const mobileMoreOptions = [
+  { label: "Wedding", occasion: "Wedding" },
+  { label: "Party", occasion: "Party" },
+  { label: "Festive", occasion: "Festive" },
+  { label: "Formal", occasion: "Formal" },
+  { label: "Sherwani", type: "Sherwani" },
+  { label: "Lehenga", type: "Lehenga" },
+  { label: "Suit", type: "Suit" },
+  { label: "Dress", type: "Dress" },
+];
+
 function Shop() {
   const sizeOptions = ["chest", "waist", "shoulder", "hips", "length"];
   const typeOptions = ["Sherwani", "Lehenga", "Kurta", "Suit", "Casual", "Dress", "Jacket"];
@@ -45,6 +63,33 @@ function Shop() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const didMountRef = useRef(false);
+
+  const mobilePanel = searchParams.get("mobilePanel") || "";
+
+  const buildParams = useCallback((overrides = {}) => {
+    const draft = {
+      q: debouncedSearch.trim(),
+      maxPrice,
+      size,
+      type,
+      occasion,
+      fitProfile,
+      sort: sort !== "newest" ? sort : "",
+      available: onlyAvailable ? "true" : "",
+      page: page > 1 ? String(page) : "",
+      mobilePanel,
+      ...overrides,
+    };
+
+    const params = {};
+    Object.entries(draft).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== "") {
+        params[key] = String(value);
+      }
+    });
+
+    return params;
+  }, [debouncedSearch, maxPrice, size, type, occasion, fitProfile, sort, onlyAvailable, page, mobilePanel]);
 
   const fetchClothes = useCallback(async (filters) => {
     setLoading(true);
@@ -80,18 +125,6 @@ function Shop() {
   }, [search]);
 
   useEffect(() => {
-    const params = {};
-
-    if (debouncedSearch.trim()) params.q = debouncedSearch.trim();
-    if (maxPrice) params.maxPrice = maxPrice;
-    if (size) params.size = size;
-    if (type) params.type = type;
-    if (occasion) params.occasion = occasion;
-    if (fitProfile) params.fitProfile = fitProfile;
-    if (sort && sort !== "newest") params.sort = sort;
-    if (onlyAvailable) params.available = "true";
-    if (page > 1) params.page = String(page);
-
     const filters = {
       q: debouncedSearch.trim(),
       maxPrice,
@@ -102,12 +135,12 @@ function Shop() {
       sort,
       available: onlyAvailable,
       page,
-      limit: 9,
+      limit: 10,
     };
 
-    setSearchParams(params, { replace: true });
+    setSearchParams(buildParams(), { replace: true });
     fetchClothes(filters);
-  }, [debouncedSearch, maxPrice, size, type, occasion, fitProfile, sort, onlyAvailable, page, setSearchParams, fetchClothes]);
+  }, [debouncedSearch, maxPrice, size, type, occasion, fitProfile, sort, onlyAvailable, page, buildParams, setSearchParams, fetchClothes]);
 
   useEffect(() => {
     if (!didMountRef.current) {
@@ -129,7 +162,7 @@ function Shop() {
       sort,
       available: onlyAvailable,
       page,
-      limit: 9,
+      limit: 10,
     });
   }, [fetchClothes, debouncedSearch, maxPrice, size, type, occasion, fitProfile, sort, onlyAvailable, page]);
 
@@ -154,6 +187,10 @@ function Shop() {
     setPage(1);
   };
 
+  const closeMobilePanel = () => {
+    setSearchParams(buildParams({ mobilePanel: "", page: page > 1 ? String(page) : "" }), { replace: true });
+  };
+
   const applyQuickFilter = (filter) => {
     if (filter.occasion) {
       setOccasion(filter.occasion);
@@ -167,6 +204,133 @@ function Shop() {
       setSort(filter.sort);
     }
     setPage(1);
+  };
+
+  const applyMobileMore = (filter) => {
+    if (filter.occasion) {
+      setOccasion(filter.occasion);
+      setType("");
+    }
+    if (filter.type) {
+      setType(filter.type);
+      setOccasion("");
+    }
+    setPage(1);
+    closeMobilePanel();
+  };
+
+  const renderMobilePanel = () => {
+    if (!mobilePanel) return null;
+
+    if (mobilePanel === "sort") {
+      return (
+        <section className="shopx-mobile-panel shopx-mobile-sheet">
+          <div className="shopx-mobile-panel-head">
+            <div>
+              <p className="shopx-mobile-kicker">Sort By</p>
+              <h2 className="title-serif">Choose sorting</h2>
+            </div>
+            <button type="button" className="btn-outline" onClick={closeMobilePanel}>Done</button>
+          </div>
+          <div className="shopx-mobile-choice-grid">
+            {mobileSortOptions.map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                className={`shopx-mobile-choice ${sort === option.value ? "active" : ""}`}
+                onClick={() => setSort(option.value)}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+        </section>
+      );
+    }
+
+    if (mobilePanel === "more") {
+      return (
+        <section className="shopx-mobile-panel shopx-mobile-sheet">
+          <div className="shopx-mobile-panel-head">
+            <div>
+              <p className="shopx-mobile-kicker">More Collections</p>
+              <h2 className="title-serif">Browse by occasion</h2>
+            </div>
+            <button type="button" className="btn-outline" onClick={closeMobilePanel}>Close</button>
+          </div>
+          <div className="shopx-mobile-choice-grid">
+            {mobileMoreOptions.map((option) => (
+              <button
+                key={option.label}
+                type="button"
+                className="shopx-mobile-choice"
+                onClick={() => applyMobileMore(option)}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+        </section>
+      );
+    }
+
+    return (
+      <section className="shopx-mobile-panel shopx-mobile-sheet">
+        <div className="shopx-mobile-panel-head">
+          <div>
+            <p className="shopx-mobile-kicker">Filters</p>
+            <h2 className="title-serif">Refine your picks</h2>
+          </div>
+          <button type="button" className="btn-outline" onClick={closeMobilePanel}>Done</button>
+        </div>
+
+        <div className="shopx-mobile-filter-stack">
+          <label className="filter-label">Search</label>
+          <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} className="filter-input" placeholder="Search name, brand, fabric" />
+
+          <label className="filter-label">Max Price / Day</label>
+          <input type="number" min="0" value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} className="filter-input" placeholder="e.g. 2500" />
+
+          <label className="filter-label">Category Type</label>
+          <select value={type} onChange={(e) => setType(e.target.value)} className="filter-select">
+            <option value="">Any</option>
+            {typeOptions.map((option) => <option key={option} value={option}>{option}</option>)}
+          </select>
+
+          <label className="filter-label">Occasion</label>
+          <select value={occasion} onChange={(e) => setOccasion(e.target.value)} className="filter-select">
+            <option value="">Any</option>
+            {occasionOptions.map((option) => <option key={option} value={option}>{option}</option>)}
+          </select>
+
+          <label className="filter-label">Fit Profile</label>
+          <select value={fitProfile} onChange={(e) => setFitProfile(e.target.value)} className="filter-select">
+            <option value="">Any</option>
+            {fitOptions.map((option) => <option key={option} value={option}>{option}</option>)}
+          </select>
+
+          <label className="filter-label">Size Measurement</label>
+          <select value={size} onChange={(e) => setSize(e.target.value)} className="filter-select">
+            <option value="">Any</option>
+            {sizeOptions.map((option) => <option key={option} value={option}>{option}</option>)}
+          </select>
+
+          <label className="filter-checkbox">
+            <input type="checkbox" checked={onlyAvailable} onChange={(e) => setOnlyAvailable(e.target.checked)} />
+            Available now only
+          </label>
+
+          <div className="shopx-mobile-actions-row">
+            <button onClick={clearFilters} disabled={loading} className="btn-outline" type="button">
+              Reset
+            </button>
+            <button onClick={closeMobilePanel} disabled={loading} className="btn-brand" type="button">
+              Show Results
+            </button>
+          </div>
+        </div>
+      </section>
+    );
   };
 
   return (
@@ -201,6 +365,8 @@ function Shop() {
           ))}
         </div>
       </section>
+
+      {renderMobilePanel()}
 
       <div className="shopx-layout">
         <aside className="shopx-sidebar">

@@ -9,13 +9,13 @@ const utilityLinks = [
   { label: "Support", to: "/profile" },
 ];
 
-const mobileCategoryLinks = [
+const mobileShopShortcuts = [
+  { label: "Filter", to: "/shop?mobilePanel=filters" },
+  { label: "Sort By", to: "/shop?mobilePanel=sort" },
   { label: "All", to: "/shop" },
   { label: "Wedding", to: "/shop?occasion=Wedding" },
-  { label: "Party", to: "/shop?occasion=Party" },
-  { label: "Festive", to: "/shop?occasion=Festive" },
-  { label: "Formal", to: "/shop?occasion=Formal" },
-  { label: "Rentals", to: "/my-rentals" },
+  { label: "Recommended", to: "/shop?sort=newest" },
+  { label: "More", to: "/shop?mobilePanel=more" },
 ];
 
 function Header() {
@@ -86,19 +86,17 @@ function Header() {
           </Link>
 
           <div className="header-mobile-actions" aria-label="Quick actions">
-            <Link to="/cart" className="header-mobile-icon" onClick={closeMenu}>
+            <Link to="/cart" className="header-mobile-icon" onClick={closeMenu} aria-label="Cart">
               <span className="header-mobile-icon-glyph header-mobile-icon-glyph-bag" aria-hidden="true"></span>
-              <small>Bag</small>
-              <strong>{cartCount}</strong>
+              {cartCount ? <em className="header-mobile-icon-badge">{cartCount}</em> : null}
             </Link>
             <Link
               to={loggedIn ? "/profile" : "/login"}
               className="header-mobile-icon"
               onClick={closeMenu}
+              aria-label={loggedIn ? "Profile" : "Login"}
             >
               <span className="header-mobile-icon-glyph header-mobile-icon-glyph-user" aria-hidden="true"></span>
-              <small>{loggedIn ? "You" : "Join"}</small>
-              <strong>{loggedIn ? "Profile" : "Login"}</strong>
             </Link>
           </div>
 
@@ -107,7 +105,7 @@ function Header() {
               type="search"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search lehenga, kurta set, party wear..."
+              placeholder="Search sherwani, lehenga, kurta set..."
               className="header-search-input"
             />
             <button type="submit" className="header-search-btn">
@@ -158,23 +156,17 @@ function Header() {
 
         <div className="page-shell">
           <div id="primary-navigation" className={`navbar ${menuOpen ? "navbar-open" : ""}`}>
-            <div className="header-mobile-panel">
-              <p className="header-mobile-panel-title">Browse the studio</p>
-              <p className="header-mobile-panel-copy">Shop collections, track rentals, and jump back into your account fast.</p>
-            </div>
-
-            <div className="mobile-category-strip" aria-label="Shop categories">
-              {mobileCategoryLinks.map((item) => (
-                <Link key={item.label} to={item.to} className="mobile-category-chip" onClick={closeMenu}>
+            <div className="mobile-shop-shortcuts" aria-label="Mobile shop shortcuts">
+              {mobileShopShortcuts.map((item) => (
+                <Link key={item.label} to={item.to} className="mobile-shop-shortcut" onClick={closeMenu}>
                   {item.label}
                 </Link>
               ))}
             </div>
 
-            <div className="navbar-secondary">
+            <div className="navbar-secondary desktop-navbar-links">
               <NavLink to="/" className={navClass} onClick={closeMenu}>Home</NavLink>
               <NavLink to="/shop" className={navClass} onClick={closeMenu}>Shop All</NavLink>
-              <NavLink to="/wishlist" className={navClass} onClick={closeMenu}>Wishlist</NavLink>
               <NavLink to="/my-rentals" className={navClass} onClick={closeMenu}>My Rentals</NavLink>
               {loggedIn && (
                 <NavLink to="/profile" className={navClass} onClick={closeMenu}>Profile</NavLink>
