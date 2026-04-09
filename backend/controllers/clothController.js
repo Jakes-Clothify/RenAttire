@@ -175,9 +175,7 @@ exports.getAll = async (req, res) => {
 
 exports.getMine = async (req, res) => {
   try {
-    const items = await Clothes.find({
-      $or: [{ createdBy: req.user._id }, { createdBy: { $exists: false } }, { createdBy: null }],
-    })
+    const items = await Clothes.find({ createdBy: req.user._id })
       .sort({ createdAt: -1 })
       .lean();
     res.json({ items });

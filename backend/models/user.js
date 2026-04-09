@@ -6,6 +6,10 @@ const schema = new mongoose.Schema({
   phone: { type: String, default: '' },
   city: { type: String, default: '' },
   bio: { type: String, default: '' },
+  companyName: { type: String, default: '' },
+  businessType: { type: String, default: '' },
+  gstNumber: { type: String, default: '' },
+  officeAddress: { type: String, default: '' },
   wishlist: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Clothes'

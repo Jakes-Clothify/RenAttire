@@ -194,7 +194,12 @@ exports.getBookedDates = async (req, res) => {
 
 exports.getAllRentals = async (req, res) => {
   try {
-    const rentals = await Rental.find()
+    const myClothes = await Clothes.find({ createdBy: req.user._id }).select("_id").lean();
+    const myClothIds = myClothes.map((item) => item._id);
+
+    const rentals = await Rental.find({
+      clothesId: { $in: myClothIds },
+    })
       .populate("clothesId")
       .populate("userId", "name email");
 

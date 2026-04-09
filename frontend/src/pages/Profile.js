@@ -12,6 +12,11 @@ function Profile() {
     phone: "",
     city: "",
     bio: "",
+    role: "user",
+    companyName: "",
+    businessType: "",
+    gstNumber: "",
+    officeAddress: "",
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -30,6 +35,11 @@ function Profile() {
           phone: res.data.phone || "",
           city: res.data.city || "",
           bio: res.data.bio || "",
+          role: res.data.role || "user",
+          companyName: res.data.companyName || "",
+          businessType: res.data.businessType || "",
+          gstNumber: res.data.gstNumber || "",
+          officeAddress: res.data.officeAddress || "",
         });
       } catch (err) {
         setFeedback({ type: "error", text: "Unable to load your account details." });
@@ -56,8 +66,8 @@ function Profile() {
   const profileStats = useMemo(() => ([
     { value: form.city || "Add city", label: "Primary location" },
     { value: form.phone || "Add phone", label: "Contact number" },
-    { value: form.bio ? "Updated" : "Pending", label: "Profile completeness" },
-  ]), [form.bio, form.city, form.phone]);
+    { value: form.role === "admin" ? (form.companyName || "Add business") : (form.bio ? "Updated" : "Pending"), label: form.role === "admin" ? "Business profile" : "Profile completeness" },
+  ]), [form.bio, form.city, form.companyName, form.phone, form.role]);
 
   const handleChange = (e) => {
     setForm((prev) => ({
@@ -77,6 +87,10 @@ function Profile() {
         phone: form.phone,
         city: form.city,
         bio: form.bio,
+        companyName: form.companyName,
+        businessType: form.businessType,
+        gstNumber: form.gstNumber,
+        officeAddress: form.officeAddress,
       });
       setForm((prev) => ({
         ...prev,
@@ -99,11 +113,14 @@ function Profile() {
     return <div className="surface p-6 text-gray-600">Loading profile...</div>;
   }
 
+  const isAdmin = form.role === "admin";
+
   return (
     <div className="space-y-5">
       <div className="page-header">
         <h1 className="title-serif text-3xl">My Profile</h1>
         <p className="text-gray-600 mt-1">Manage your account details and keep booking information current.</p>
+        <p className="text-sm text-slate-500 mt-2">Account type: {isAdmin ? "Admin" : "User"}</p>
       </div>
 
       <div className="mixhome-proof">
@@ -199,9 +216,35 @@ function Profile() {
         </div>
 
         <div className="form-field">
-          <label className="field-label">Bio</label>
-          <textarea className="field-input" rows={5} name="bio" value={form.bio} onChange={handleChange} placeholder="Tell us about your style, preferred fits, or event needs." />
+          <label className="field-label">{isAdmin ? "Admin Bio" : "Bio"}</label>
+          <textarea className="field-input" rows={5} name="bio" value={form.bio} onChange={handleChange} placeholder={isAdmin ? "Tell us about your business, inventory focus, or service area." : "Tell us about your style, preferred fits, or event needs."} />
         </div>
+
+        {isAdmin && (
+          <>
+            <div className="adminx-form-row">
+              <div className="form-field">
+                <label className="field-label">Company / Store Name</label>
+                <input className="field-input" name="companyName" value={form.companyName} onChange={handleChange} placeholder="RenAttire Studio" />
+              </div>
+              <div className="form-field">
+                <label className="field-label">Business Type</label>
+                <input className="field-input" name="businessType" value={form.businessType} onChange={handleChange} placeholder="Rental Boutique" />
+              </div>
+            </div>
+
+            <div className="adminx-form-row">
+              <div className="form-field">
+                <label className="field-label">GST Number</label>
+                <input className="field-input" name="gstNumber" value={form.gstNumber} onChange={handleChange} placeholder="22AAAAA0000A1Z5" />
+              </div>
+              <div className="form-field">
+                <label className="field-label">Office Address</label>
+                <input className="field-input" name="officeAddress" value={form.officeAddress} onChange={handleChange} placeholder="Store or office address" />
+              </div>
+            </div>
+          </>
+        )}
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <button disabled={saving} className="btn-brand w-fit">

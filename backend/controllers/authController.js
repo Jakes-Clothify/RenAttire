@@ -4,14 +4,39 @@ const User = require('../models/user');
 const Clothes = require('../models/Clothes');
 
 exports.signup = async (req, res) => {
-  const { name, email, password } = req.body;
+  const {
+    name,
+    email,
+    password,
+    phone,
+    city,
+    bio,
+    role,
+    companyName,
+    businessType,
+    gstNumber,
+    officeAddress,
+  } = req.body;
 
   const exists = await User.findOne({ email });
   if (exists) return res.status(400).json({ message: 'Email already exists' });
 
   const hashed = await bcrypt.hash(password, 10);
+  const safeRole = role === 'admin' ? 'admin' : 'user';
 
-  const user = await User.create({ name, email, password: hashed });
+  const user = await User.create({
+    name: (name || '').trim(),
+    email: (email || '').trim().toLowerCase(),
+    password: hashed,
+    phone: (phone || '').trim(),
+    city: (city || '').trim(),
+    bio: (bio || '').trim(),
+    role: safeRole,
+    companyName: safeRole === 'admin' ? (companyName || '').trim() : '',
+    businessType: safeRole === 'admin' ? (businessType || '').trim() : '',
+    gstNumber: safeRole === 'admin' ? (gstNumber || '').trim() : '',
+    officeAddress: safeRole === 'admin' ? (officeAddress || '').trim() : '',
+  });
 
   res.json({
     message: 'Registered successfully',
@@ -20,18 +45,28 @@ exports.signup = async (req, res) => {
       name: user.name,
       email: user.email,
       role: user.role,
+      phone: user.phone,
+      city: user.city,
+      bio: user.bio,
+      companyName: user.companyName,
+      businessType: user.businessType,
+      gstNumber: user.gstNumber,
+      officeAddress: user.officeAddress,
     }
   });
 };
 
 exports.login = async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, role } = req.body;
 
-  const user = await User.findOne({ email });
+  const user = await User.findOne({ email: (email || '').trim().toLowerCase() });
   if (!user) return res.status(401).json({ message: 'Invalid credentials' });
 
   const match = await bcrypt.compare(password, user.password);
   if (!match) return res.status(401).json({ message: 'Invalid credentials' });
+  if ((role === 'admin' || role === 'user') && user.role !== role) {
+    return res.status(401).json({ message: `This account is registered as a ${user.role}` });
+  }
 
   const token = jwt.sign(
     { id: user._id, role: user.role },
@@ -49,7 +84,7 @@ exports.getMe = async (req, res) => {
 };
 
 exports.updateMe = async (req, res) => {
-  const { name, phone, city, bio } = req.body;
+  const { name, phone, city, bio, companyName, businessType, gstNumber, officeAddress } = req.body;
 
   const user = await User.findById(req.user._id);
   if (!user) return res.status(404).json({ message: 'User not found' });
@@ -58,6 +93,12 @@ exports.updateMe = async (req, res) => {
   user.phone = (phone ?? user.phone ?? '').trim();
   user.city = (city ?? user.city ?? '').trim();
   user.bio = (bio ?? user.bio ?? '').trim();
+  if (user.role === 'admin') {
+    user.companyName = (companyName ?? user.companyName ?? '').trim();
+    user.businessType = (businessType ?? user.businessType ?? '').trim();
+    user.gstNumber = (gstNumber ?? user.gstNumber ?? '').trim();
+    user.officeAddress = (officeAddress ?? user.officeAddress ?? '').trim();
+  }
 
   await user.save();
 
@@ -71,6 +112,10 @@ exports.updateMe = async (req, res) => {
       city: user.city,
       bio: user.bio,
       role: user.role,
+      companyName: user.companyName,
+      businessType: user.businessType,
+      gstNumber: user.gstNumber,
+      officeAddress: user.officeAddress,
     }
   });
 };
