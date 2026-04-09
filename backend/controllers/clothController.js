@@ -359,3 +359,4 @@ exports.remove = async (req, res) => {
   await Clothes.findByIdAndDelete(req.params.id);
   res.json({ message: 'Deleted successfully' });
 };
+
