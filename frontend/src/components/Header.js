@@ -9,6 +9,15 @@ const utilityLinks = [
   { label: "Support", to: "/profile" },
 ];
 
+const mobileCategoryLinks = [
+  { label: "All", to: "/shop" },
+  { label: "Wedding", to: "/shop?occasion=Wedding" },
+  { label: "Party", to: "/shop?occasion=Party" },
+  { label: "Festive", to: "/shop?occasion=Festive" },
+  { label: "Formal", to: "/shop?occasion=Formal" },
+  { label: "Rentals", to: "/my-rentals" },
+];
+
 function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -77,11 +86,6 @@ function Header() {
           </Link>
 
           <div className="header-mobile-actions" aria-label="Quick actions">
-            <Link to="/wishlist" className="header-mobile-icon" onClick={closeMenu}>
-              <span className="header-mobile-icon-glyph header-mobile-icon-glyph-save" aria-hidden="true"></span>
-              <small>Saved</small>
-              <strong>{wishlistCount}</strong>
-            </Link>
             <Link to="/cart" className="header-mobile-icon" onClick={closeMenu}>
               <span className="header-mobile-icon-glyph header-mobile-icon-glyph-bag" aria-hidden="true"></span>
               <small>Bag</small>
@@ -94,7 +98,7 @@ function Header() {
             >
               <span className="header-mobile-icon-glyph header-mobile-icon-glyph-user" aria-hidden="true"></span>
               <small>{loggedIn ? "You" : "Join"}</small>
-              <strong>{loggedIn ? "Acct" : "Login"}</strong>
+              <strong>{loggedIn ? "Profile" : "Login"}</strong>
             </Link>
           </div>
 
@@ -103,7 +107,7 @@ function Header() {
               type="search"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search sherwani, lehenga, cocktail dress, kurta..."
+              placeholder="Search lehenga, kurta set, party wear..."
               className="header-search-input"
             />
             <button type="submit" className="header-search-btn">
@@ -158,9 +162,19 @@ function Header() {
               <p className="header-mobile-panel-title">Browse the studio</p>
               <p className="header-mobile-panel-copy">Shop collections, track rentals, and jump back into your account fast.</p>
             </div>
+
+            <div className="mobile-category-strip" aria-label="Shop categories">
+              {mobileCategoryLinks.map((item) => (
+                <Link key={item.label} to={item.to} className="mobile-category-chip" onClick={closeMenu}>
+                  {item.label}
+                </Link>
+              ))}
+            </div>
+
             <div className="navbar-secondary">
               <NavLink to="/" className={navClass} onClick={closeMenu}>Home</NavLink>
               <NavLink to="/shop" className={navClass} onClick={closeMenu}>Shop All</NavLink>
+              <NavLink to="/wishlist" className={navClass} onClick={closeMenu}>Wishlist</NavLink>
               <NavLink to="/my-rentals" className={navClass} onClick={closeMenu}>My Rentals</NavLink>
               {loggedIn && (
                 <NavLink to="/profile" className={navClass} onClick={closeMenu}>Profile</NavLink>
