@@ -360,7 +360,7 @@ function Admin() {
                 className="field-input"
                 type="file"
                 name="image"
-                accept="image/*"
+                accept=".jpg,.jpeg,.png,.webp,.gif,.avif"
                 onChange={(e) => setImage(e.target.files[0])}
                 required
               />
@@ -372,7 +372,7 @@ function Admin() {
                 className="field-input"
                 type="file"
                 name="images"
-                accept="image/*"
+                accept=".jpg,.jpeg,.png,.webp,.gif,.avif"
                 multiple
                 onChange={(e) => setGalleryImages(Array.from(e.target.files || []))}
               />
@@ -503,3 +503,4 @@ function Admin() {
 }
 
 export default Admin;
+

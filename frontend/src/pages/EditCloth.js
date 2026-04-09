@@ -298,7 +298,7 @@ function EditCloth() {
               className="field-input"
               type="file"
               name="image"
-              accept="image/*"
+              accept=".jpg,.jpeg,.png,.webp,.gif,.avif"
               onChange={(e) => setImage(e.target.files[0])}
             />
           </div>
@@ -308,7 +308,7 @@ function EditCloth() {
               className="field-input"
               type="file"
               name="images"
-              accept="image/*"
+              accept=".jpg,.jpeg,.png,.webp,.gif,.avif"
               multiple
               onChange={(e) => setGalleryImages(Array.from(e.target.files || []))}
             />
@@ -363,3 +363,4 @@ function EditCloth() {
 }
 
 export default EditCloth;
+
