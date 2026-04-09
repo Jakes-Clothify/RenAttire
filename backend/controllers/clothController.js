@@ -59,6 +59,17 @@ const parseImageOrder = (raw) => {
   }
 };
 
+const parseRemovedImages = (raw) => {
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.map((x) => String(x || "").trim()).filter(Boolean);
+  } catch {
+    return [];
+  }
+};
+
 exports.getAll = async (req, res) => {
   const { q, maxPrice, size, sort, page, limit, available, type, occasion, fitProfile } = req.query;
 
@@ -309,6 +320,7 @@ exports.update = async (req, res) => {
       fitProfile,
       availableSizes,
       imageOrder,
+      removedImages,
     } = req.body;
 
     const parsedSizes = parseSizes(availableSizes);
@@ -337,11 +349,13 @@ exports.update = async (req, res) => {
         ? [cloth.image]
         : [];
     const requestedOrder = parseImageOrder(imageOrder);
+    const explicitRemovals = new Set(parseRemovedImages(removedImages));
+    const keptExisting = existing.filter((img) => !explicitRemovals.has(img));
     const orderedExisting = requestedOrder.length
-      ? requestedOrder.filter((img) => existing.includes(img))
-      : existing;
+      ? requestedOrder.filter((img) => keptExisting.includes(img))
+      : keptExisting;
 
-    let nextImages = orderedExisting.length ? orderedExisting : existing;
+    let nextImages = orderedExisting.length ? orderedExisting : keptExisting;
 
     if (coverPath) {
       nextImages = [coverPath, ...nextImages.filter((img) => img !== coverPath)];

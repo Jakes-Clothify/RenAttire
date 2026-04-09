@@ -29,6 +29,7 @@ function EditCloth() {
   const [galleryImages, setGalleryImages] = useState([]);
   const [currentImage, setCurrentImage] = useState("");
   const [currentGallery, setCurrentGallery] = useState([]);
+  const [removedImages, setRemovedImages] = useState([]);
   const [dragIndex, setDragIndex] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -87,6 +88,7 @@ function EditCloth() {
               ? [cloth.image]
               : []
         );
+        setRemovedImages([]);
       } catch (err) {
         setError(err.response?.data?.message || "Failed to load product");
       } finally {
@@ -115,7 +117,11 @@ function EditCloth() {
 
   const removeCurrentImage = (index) => {
     setCurrentGallery((prev) => {
+      const removedImage = prev[index];
       const nextGallery = prev.filter((_, currentIndex) => currentIndex !== index);
+      if (removedImage) {
+        setRemovedImages((existing) => [...existing, removedImage]);
+      }
       setCurrentImage(nextGallery[0] || "");
       return nextGallery;
     });
@@ -166,6 +172,7 @@ function EditCloth() {
     formData.append("fitProfile", fitProfile);
     formData.append("availableSizes", JSON.stringify(formattedSizes));
     formData.append("imageOrder", JSON.stringify(currentGallery));
+    formData.append("removedImages", JSON.stringify(removedImages));
     if (image) formData.append("image", image);
     galleryImages.forEach((file) => formData.append("images", file));
 
