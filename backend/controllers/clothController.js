@@ -22,11 +22,29 @@ const parseSizes = (raw) => {
   }
 };
 
+const resolveUploadedPath = (file) => {
+  if (!file) return "";
+
+  if (typeof file.path === "string" && /^https?:\/\//i.test(file.path)) {
+    return file.path;
+  }
+
+  if (typeof file.secure_url === "string" && /^https?:\/\//i.test(file.secure_url)) {
+    return file.secure_url;
+  }
+
+  if (file.filename) {
+    return `/uploads/${file.filename}`;
+  }
+
+  return "";
+};
+
 const parseUploadedImages = (req) => {
   const cover = req.files?.image?.[0] || req.file || null;
   const extras = Array.isArray(req.files?.images) ? req.files.images : [];
-  const coverPath = cover ? `/uploads/${cover.filename}` : "";
-  const extraPaths = extras.map((f) => `/uploads/${f.filename}`);
+  const coverPath = resolveUploadedPath(cover);
+  const extraPaths = extras.map((f) => resolveUploadedPath(f)).filter(Boolean);
   return { coverPath, extraPaths };
 };
 
@@ -89,7 +107,6 @@ exports.getAll = async (req, res) => {
     Clothes.countDocuments(filter),
   ]);
 
-  // ===== Availability Intelligence =====
   const now = new Date();
   const soonThreshold = new Date(now.getTime() + 48 * 60 * 60 * 1000);
 
@@ -159,13 +176,11 @@ exports.getMine = async (req, res) => {
   }
 };
 
-
 exports.getOne = async (req, res) => {
   try {
     const cloth = await Clothes.findById(req.params.id).lean();
     if (!cloth) return res.status(404).json({ message: "Not found" });
 
-    // ---- Availability logic same as getAll ----
     const now = new Date();
     const soonThreshold = new Date(now.getTime() + 48 * 60 * 60 * 1000);
 
@@ -233,7 +248,12 @@ exports.create = async (req, res) => {
     const safePrice = Number(pricePerDay) || 0;
 
     const { coverPath, extraPaths } = parseUploadedImages(req);
+    const requestedOrder = parseImageOrder(imageOrder);
     const imageList = [coverPath, ...extraPaths].filter(Boolean);
+    const orderedImages = requestedOrder.length
+      ? requestedOrder.filter((img) => imageList.includes(img))
+      : imageList;
+    const finalImages = orderedImages.length ? orderedImages : imageList;
 
     const cloth = await Clothes.create({
       name,
@@ -249,8 +269,8 @@ exports.create = async (req, res) => {
       pricePerDay: safePrice,
       type: safeType,
       fitProfile: safeFitProfile,
-      image: coverPath || extraPaths[0] || "",
-      images: imageList,
+      image: finalImages[0] || "",
+      images: finalImages,
       available: true,
       availableSizes: parsedSizes
     });
@@ -288,6 +308,7 @@ exports.update = async (req, res) => {
       type,
       fitProfile,
       availableSizes,
+      imageOrder,
     } = req.body;
 
     const parsedSizes = parseSizes(availableSizes);
@@ -359,4 +380,3 @@ exports.remove = async (req, res) => {
   await Clothes.findByIdAndDelete(req.params.id);
   res.json({ message: 'Deleted successfully' });
 };
-
