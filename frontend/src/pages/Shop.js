@@ -220,7 +220,7 @@ function Shop() {
   };
 
   const renderMobilePanel = () => {
-    if (!mobilePanel) return null;
+    if (!mobilePanel || mobilePanel === "filters") return null;
 
     if (mobilePanel === "sort") {
       return (
@@ -248,86 +248,26 @@ function Shop() {
       );
     }
 
-    if (mobilePanel === "more") {
-      return (
-        <section className="shopx-mobile-panel shopx-mobile-sheet">
-          <div className="shopx-mobile-panel-head">
-            <div>
-              <p className="shopx-mobile-kicker">More Collections</p>
-              <h2 className="title-serif">Browse by occasion</h2>
-            </div>
-            <button type="button" className="btn-outline" onClick={closeMobilePanel}>Close</button>
-          </div>
-          <div className="shopx-mobile-choice-grid">
-            {mobileMoreOptions.map((option) => (
-              <button
-                key={option.label}
-                type="button"
-                className="shopx-mobile-choice"
-                onClick={() => applyMobileMore(option)}
-              >
-                {option.label}
-              </button>
-            ))}
-          </div>
-        </section>
-      );
-    }
-
     return (
       <section className="shopx-mobile-panel shopx-mobile-sheet">
         <div className="shopx-mobile-panel-head">
           <div>
-            <p className="shopx-mobile-kicker">Filters</p>
-            <h2 className="title-serif">Refine your picks</h2>
+            <p className="shopx-mobile-kicker">More Collections</p>
+            <h2 className="title-serif">Browse by occasion</h2>
           </div>
-          <button type="button" className="btn-outline" onClick={closeMobilePanel}>Done</button>
+          <button type="button" className="btn-outline" onClick={closeMobilePanel}>Close</button>
         </div>
-
-        <div className="shopx-mobile-filter-stack">
-          <label className="filter-label">Search</label>
-          <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} className="filter-input" placeholder="Search name, brand, fabric" />
-
-          <label className="filter-label">Max Price / Day</label>
-          <input type="number" min="0" value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} className="filter-input" placeholder="e.g. 2500" />
-
-          <label className="filter-label">Category Type</label>
-          <select value={type} onChange={(e) => setType(e.target.value)} className="filter-select">
-            <option value="">Any</option>
-            {typeOptions.map((option) => <option key={option} value={option}>{option}</option>)}
-          </select>
-
-          <label className="filter-label">Occasion</label>
-          <select value={occasion} onChange={(e) => setOccasion(e.target.value)} className="filter-select">
-            <option value="">Any</option>
-            {occasionOptions.map((option) => <option key={option} value={option}>{option}</option>)}
-          </select>
-
-          <label className="filter-label">Fit Profile</label>
-          <select value={fitProfile} onChange={(e) => setFitProfile(e.target.value)} className="filter-select">
-            <option value="">Any</option>
-            {fitOptions.map((option) => <option key={option} value={option}>{option}</option>)}
-          </select>
-
-          <label className="filter-label">Size Measurement</label>
-          <select value={size} onChange={(e) => setSize(e.target.value)} className="filter-select">
-            <option value="">Any</option>
-            {sizeOptions.map((option) => <option key={option} value={option}>{option}</option>)}
-          </select>
-
-          <label className="filter-checkbox">
-            <input type="checkbox" checked={onlyAvailable} onChange={(e) => setOnlyAvailable(e.target.checked)} />
-            Available now only
-          </label>
-
-          <div className="shopx-mobile-actions-row">
-            <button onClick={clearFilters} disabled={loading} className="btn-outline" type="button">
-              Reset
+        <div className="shopx-mobile-choice-grid">
+          {mobileMoreOptions.map((option) => (
+            <button
+              key={option.label}
+              type="button"
+              className="shopx-mobile-choice"
+              onClick={() => applyMobileMore(option)}
+            >
+              {option.label}
             </button>
-            <button onClick={closeMobilePanel} disabled={loading} className="btn-brand" type="button">
-              Show Results
-            </button>
-          </div>
+          ))}
         </div>
       </section>
     );

@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Layout from "./components/Layout";
 import HomeLanding from "./pages/HomeLanding";
 import Shop from "./pages/Shop";
+import ShopFilters from "./pages/ShopFilters";
 import Cart from "./pages/Cart";
 import Payment from "./pages/Payment";
 import Signup from "./pages/Signup";
@@ -18,8 +19,6 @@ import AdminRoute from "./components/AdminRoute";
 import ProductDetails from "./pages/ProductDetails";
 import EditCloth from "./pages/EditCloth";
 
-
-
 function App() {
   return (
     <BrowserRouter>
@@ -27,6 +26,7 @@ function App() {
         <Routes>
           <Route path="/" element={<HomeLanding />} />
           <Route path="/shop" element={<Shop />} />
+          <Route path="/shop/filters" element={<ShopFilters />} />
 
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />

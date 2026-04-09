@@ -1,6 +1,7 @@
 @media (min-width: 768px) {
   .mobile-shop-shortcuts,
-  .shopx-mobile-panel {
+  .shopx-mobile-panel,
+  .shopx-mobile-filter-page {
     display: none !important;
   }
 }
@@ -62,6 +63,10 @@
     box-shadow: 0 12px 22px rgba(11, 49, 44, 0.24);
   }
 
+  .brand-copy {
+    min-width: 0;
+  }
+
   .brand-copy strong {
     font-size: 1.1rem;
     line-height: 1.05;
@@ -78,7 +83,9 @@
   .header-mobile-actions {
     display: flex;
     align-items: center;
+    justify-self: end;
     gap: 0.6rem;
+    flex-shrink: 0;
   }
 
   .header-mobile-icon {
@@ -262,7 +269,12 @@
     gap: 0.9rem;
   }
 
-  .shopx-quick-filters {
+  .shopx-mobile-filter-page {
+    padding-top: 0.2rem;
+  }
+
+  .shopx-quick-filters,
+  .shopx-mobile-sheet {
     padding: 0.95rem;
     border-radius: 1.2rem;
     background: rgba(255, 255, 255, 0.92);
@@ -304,14 +316,6 @@
 
   .shopx-mobile-panel {
     display: block;
-  }
-
-  .shopx-mobile-sheet {
-    background: rgba(255, 255, 255, 0.96);
-    border: 1px solid rgba(17, 24, 39, 0.06);
-    border-radius: 1.25rem;
-    padding: 1rem;
-    box-shadow: 0 12px 22px rgba(17, 24, 39, 0.06);
   }
 
   .shopx-mobile-panel-head {
@@ -490,6 +494,10 @@
 }
 
 @media (max-width: 479px) {
+  .header-inner {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
   .mobile-shop-shortcuts {
     grid-template-columns: repeat(6, minmax(80px, 1fr));
   }

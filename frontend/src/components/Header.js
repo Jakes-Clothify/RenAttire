@@ -1,21 +1,12 @@
 import { useState } from "react";
-import { Link, NavLink, useNavigate } from "react-router-dom";
+import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { isLoggedIn, logout } from "../utils/auth";
+import { isLoggedIn } from "../utils/auth";
 
 const utilityLinks = [
   { label: "New Arrivals", to: "/shop?sort=newest" },
   { label: "Wedding Edit", to: "/shop?occasion=Wedding" },
   { label: "Support", to: "/profile" },
-];
-
-const mobileShopShortcuts = [
-  { label: "Filter", to: "/shop?mobilePanel=filters" },
-  { label: "Sort By", to: "/shop?mobilePanel=sort" },
-  { label: "All", to: "/shop" },
-  { label: "Wedding", to: "/shop?occasion=Wedding" },
-  { label: "Recommended", to: "/shop?sort=newest" },
-  { label: "More", to: "/shop?mobilePanel=more" },
 ];
 
 function Header() {
@@ -25,6 +16,16 @@ function Header() {
   const cartCount = useSelector((state) => state.cart.length);
   const wishlistCount = useSelector((state) => state.wishlist.length);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const mobileShopShortcuts = [
+    { label: "Filter", to: `/shop/filters${location.search}` },
+    { label: "Sort By", to: "/shop?mobilePanel=sort" },
+    { label: "All", to: "/shop" },
+    { label: "Wedding", to: "/shop?occasion=Wedding" },
+    { label: "Recommended", to: "/shop?sort=newest" },
+    { label: "More", to: "/shop?mobilePanel=more" },
+  ];
 
   const getRole = () => {
     try {
@@ -49,11 +50,6 @@ function Header() {
     e.preventDefault();
     const query = search.trim();
     navigate(query ? `/shop?q=${encodeURIComponent(query)}` : "/shop");
-    closeMenu();
-  };
-
-  const handleLogout = () => {
-    logout();
     closeMenu();
   };
 
@@ -176,11 +172,6 @@ function Header() {
               )}
               {!loggedIn && (
                 <NavLink to="/signup" className={navClass} onClick={closeMenu}>Signup</NavLink>
-              )}
-              {loggedIn && (
-                <button onClick={handleLogout} className="btn-logout">
-                  Logout
-                </button>
               )}
             </div>
           </div>
