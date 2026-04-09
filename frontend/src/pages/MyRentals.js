@@ -82,7 +82,7 @@ function MyRentals() {
       )}
 
       {rentals.map((r) => (
-        <div key={r._id} className="rental-card rental-product-card">
+        <div key={r._id} className="rental-product-card">
           <Link to={`/cloth/${r.clothesId?._id || ""}`} className="rental-card-media">
             <img
               src={resolveMediaUrl(resolvePrimaryImage(r.clothesId))}
@@ -99,19 +99,10 @@ function MyRentals() {
               </Link>
               <p className="cart-card-price">Rs {r.totalPrice}</p>
               <p className="cart-card-subtle">
-                {r.startDate ? new Date(r.startDate).toLocaleDateString() : "-"} to{" "}
-                {r.endDate ? new Date(r.endDate).toLocaleDateString() : "-"}
+                {r.startDate ? new Date(r.startDate).toLocaleDateString() : "-"} → {r.endDate ? new Date(r.endDate).toLocaleDateString() : "-"}
               </p>
-            </div>
-
-            <div className="rental-meta rental-meta-grid">
-              <p>Days: {r.rentalDays}</p>
-              <p>Total: Rs {r.totalPrice}</p>
-              <p>
-                Status:
-                <span className={getStatusClass(r.status)}>
-                  {r.status}
-                </span>
+              <p className="text-sm text-gray-500">
+                Status: <span className={getStatusClass(r.status)}>{r.status}</span>
               </p>
             </div>
           </div>

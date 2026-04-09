@@ -1,5 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { getProfile, updateProfile } from "../services/authService";
+import { getMyRentals } from "../services/rentalService";
+import { logout } from "../utils/auth";
+import { resolveMediaUrl, resolvePrimaryImage } from "../utils/media";
 
 function Profile() {
   const [form, setForm] = useState({
@@ -11,7 +15,10 @@ function Profile() {
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [orders, setOrders] = useState([]);
+  const [ordersLoading, setOrdersLoading] = useState(true);
   const [feedback, setFeedback] = useState({ type: "", text: "" });
+  const navigate = useNavigate();
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -31,7 +38,19 @@ function Profile() {
       }
     };
 
+    const loadOrders = async () => {
+      try {
+        const res = await getMyRentals();
+        setOrders(res.data || []);
+      } catch (err) {
+        console.log(err);
+      } finally {
+        setOrdersLoading(false);
+      }
+    };
+
     loadProfile();
+    loadOrders();
   }, []);
 
   const profileStats = useMemo(() => ([
@@ -71,6 +90,11 @@ function Profile() {
     }
   };
 
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
+
   if (loading) {
     return <div className="surface p-6 text-gray-600">Loading profile...</div>;
   }
@@ -90,6 +114,60 @@ function Profile() {
           </article>
         ))}
       </div>
+
+      <div className="grid gap-4 lg:grid-cols-[1.4fr_1fr]">
+        <Link to="/my-rentals" className="surface rounded-[1.8rem] border border-black/10 p-5 transition hover:shadow-lg">
+          <p className="text-xs uppercase tracking-[0.24em] text-slate-500">My Orders</p>
+          <h2 className="mt-4 text-4xl font-semibold">{ordersLoading ? "..." : orders.length}</h2>
+          <p className="mt-3 text-sm text-gray-600">Quick access to your order history and product details.</p>
+        </Link>
+
+        <div className="surface rounded-[1.8rem] border border-black/10 p-5">
+          <p className="text-xs uppercase tracking-[0.24em] text-slate-500">Order actions</p>
+          <p className="mt-3 text-sm text-gray-600">Tap below to see your ordered products in a short card view and open details for any item.</p>
+          <Link to="/my-rentals" className="btn-brand mt-5 inline-flex items-center justify-center w-full px-4 py-3">
+            View My Orders
+          </Link>
+        </div>
+      </div>
+
+      {orders.length > 0 && (
+        <div className="space-y-4">
+          <div className="split-header">
+            <div>
+              <h2 className="title-serif text-2xl">Recent Orders</h2>
+              <p className="text-gray-600">Open any ordered product to view its detail page.</p>
+            </div>
+            <Link to="/my-rentals" className="text-sm text-teal-700 hover:underline">See all orders</Link>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            {orders.slice(0, 2).map((order) => (
+              <Link
+                key={order._id}
+                to={`/cloth/${order.clothesId?._id || ""}`}
+                className="rental-product-card rounded-[1.6rem] p-4 border border-black/10 bg-white transition hover:shadow-lg"
+              >
+                <div className="rental-card-media">
+                  <img
+                    src={resolveMediaUrl(resolvePrimaryImage(order.clothesId))}
+                    alt={order.clothesId?.name || "Ordered item"}
+                    loading="lazy"
+                  />
+                </div>
+                <div className="rental-card-body">
+                  <p className="cart-card-kicker">Order {order.orderId || "-"}</p>
+                  <p className="cart-card-title">{order.clothesId?.name || "Ordered item"}</p>
+                  <p className="cart-card-price">Rs {order.totalPrice}</p>
+                  <p className="cart-card-subtle">
+                    {order.startDate ? new Date(order.startDate).toLocaleDateString() : "-"} to {order.endDate ? new Date(order.endDate).toLocaleDateString() : "-"}
+                  </p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
 
       {feedback.text && (
         <p className={feedback.type === "error" ? "msg-error" : "msg-success"}>
@@ -125,9 +203,15 @@ function Profile() {
           <textarea className="field-input" rows={5} name="bio" value={form.bio} onChange={handleChange} placeholder="Tell us about your style, preferred fits, or event needs." />
         </div>
 
-        <button disabled={saving} className="btn-brand w-fit">
-          {saving ? "Saving..." : "Save Profile"}
-        </button>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <button disabled={saving} className="btn-brand w-fit">
+            {saving ? "Saving..." : "Save Profile"}
+          </button>
+
+          <button type="button" onClick={handleLogout} className="btn-logout">
+            Logout
+          </button>
+        </div>
       </form>
     </div>
   );

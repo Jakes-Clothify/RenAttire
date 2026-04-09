@@ -52,6 +52,12 @@ function EditCloth() {
   }, [imagePreview, galleryPreviews]);
 
   useEffect(() => {
+    if (!image) {
+      setCurrentImage(currentGallery[0] || "");
+    }
+  }, [currentGallery, image]);
+
+  useEffect(() => {
     const load = async () => {
       setLoading(true);
       setError("");
@@ -104,6 +110,14 @@ function EditCloth() {
       const copy = [...prev];
       [copy[index], copy[nextIndex]] = [copy[nextIndex], copy[index]];
       return copy;
+    });
+  };
+
+  const removeCurrentImage = (index) => {
+    setCurrentGallery((prev) => {
+      const nextGallery = prev.filter((_, currentIndex) => currentIndex !== index);
+      setCurrentImage(nextGallery[0] || "");
+      return nextGallery;
     });
   };
 
@@ -338,6 +352,9 @@ function EditCloth() {
                     <button type="button" onClick={() => moveImage(idx, 1)} disabled={idx === currentGallery.length - 1}>
                       Right
                     </button>
+                    <button type="button" onClick={() => removeCurrentImage(idx)}>
+                      Delete
+                    </button>
                   </div>
                 </div>
               ))}
@@ -363,4 +380,5 @@ function EditCloth() {
 }
 
 export default EditCloth;
+
 

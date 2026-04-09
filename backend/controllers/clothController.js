@@ -359,7 +359,7 @@ exports.update = async (req, res) => {
     }
 
     cloth.images = deduped;
-    if (deduped.length) cloth.image = deduped[0];
+    cloth.image = deduped[0] || "";
 
     await cloth.save();
     res.json(cloth);
