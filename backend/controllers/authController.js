@@ -84,7 +84,7 @@ exports.getMe = async (req, res) => {
 };
 
 exports.updateMe = async (req, res) => {
-  const { name, phone, city, bio, address, companyName, businessType, gstNumber, officeAddress } = req.body;
+  const { name, phone, city, bio, companyName, businessType, gstNumber, officeAddress } = req.body;
 
   const user = await User.findById(req.user._id);
   if (!user) return res.status(404).json({ message: 'User not found' });
@@ -110,7 +110,6 @@ exports.updateMe = async (req, res) => {
       email: user.email,
       phone: user.phone,
       city: user.city,
-      address: user.address,
       bio: user.bio,
       role: user.role,
       companyName: user.companyName,
