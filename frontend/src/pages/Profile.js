@@ -12,6 +12,7 @@ function Profile() {
     phone: "",
     city: "",
     bio: "",
+    address: "",
     role: "user",
     companyName: "",
     businessType: "",
@@ -35,6 +36,7 @@ function Profile() {
           phone: res.data.phone || "",
           city: res.data.city || "",
           bio: res.data.bio || "",
+          address: res.data.address || "",
           role: res.data.role || "user",
           companyName: res.data.companyName || "",
           businessType: res.data.businessType || "",
@@ -66,6 +68,7 @@ function Profile() {
   const profileStats = useMemo(() => ([
     { value: form.city || "Add city", label: "Primary location" },
     { value: form.phone || "Add phone", label: "Contact number" },
+    { value: form.address || "Add address", label: "Address" },
     { value: form.role === "admin" ? (form.companyName || "Add business") : (form.bio ? "Updated" : "Pending"), label: form.role === "admin" ? "Business profile" : "Profile completeness" },
   ]), [form.bio, form.city, form.companyName, form.phone, form.role]);
 
@@ -87,6 +90,7 @@ function Profile() {
         phone: form.phone,
         city: form.city,
         bio: form.bio,
+        address: form.address, 
         companyName: form.companyName,
         businessType: form.businessType,
         gstNumber: form.gstNumber,
@@ -172,6 +176,18 @@ function Profile() {
                     loading="lazy"
                   />
                 </div>
+                <div className="form-field">
+                  <label className="field-label">Address</label>
+                  <textarea
+                    className="field-input"
+                    rows={3}
+                    name="address"
+                    value={form.address}
+                    onChange={handleChange}
+                    placeholder="Enter your full address"
+                  />
+                </div>
+                      
                 <div className="rental-card-body">
                   <p className="cart-card-kicker">Order {order.orderId || "-"}</p>
                   <p className="cart-card-title">{order.clothesId?.name || "Ordered item"}</p>
