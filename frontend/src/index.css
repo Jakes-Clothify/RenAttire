@@ -1635,9 +1635,9 @@
     grid-template-columns: 1fr;
   }
 
-  @media (min-width: 1100px) {
+  @media (min-width: 1024px) {
     .pdp-amz-main {
-      grid-template-columns: minmax(300px, 420px) minmax(0, 1fr) minmax(300px, 360px);
+      grid-template-columns: minmax(220px, 300px) minmax(0, 1fr) minmax(240px, 300px);
       align-items: start;
     }
   }
@@ -1756,22 +1756,37 @@
     height: fit-content;
   }
 
-  @media (min-width: 1100px) {
+  @media (min-width: 1024px) {
     .pdp-amz-main {
-      grid-template-columns: minmax(320px, 400px) minmax(0, 1fr) minmax(320px, 360px);
-      column-gap: 16px;
+      grid-template-columns: minmax(220px, 300px) minmax(0, 1fr) minmax(240px, 300px);
+      column-gap: 14px;
+      overflow: visible;
     }
 
-    /* Keep image column behaving like the booking/input column */
-    .pdp-amz-gallery {
-      position: sticky;
-      top: 96px;
+    .pdp-amz-center,
+    .pdp-booking,
+    .pdp-sticky-rail {
+      position: static;
+      top: auto;
+      max-height: none;
+      overflow: visible;
+      align-self: start;
     }
-  }
 
-  @media (max-width: 1099px) {
+    .pdp-title {
+      font-size: clamp(1.7rem, 2.2vw, 2.5rem);
+    }
+
     .pdp-amz-gallery {
       position: static;
+      top: auto;
+      align-self: start;
+      overflow: visible;
+    }
+
+    .pdp-booking {
+      position: sticky;
+      top: 96px;
     }
   }
 

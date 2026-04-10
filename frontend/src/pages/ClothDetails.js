@@ -323,6 +323,7 @@ function ClothDetails() {
     <div className="pdp-page pdp-amz-page pdp-polish pdp-vibe-next">
       <section className="pdp-amz-main">
         <div className="pdp-amz-gallery surface">
+          <div className="pdp-sticky-rail">
           <div className="pdp-amz-gallery-shell">
             <div className="pdp-amz-thumb-rail">
               {galleryImages.map((img, idx) => (
@@ -356,6 +357,7 @@ function ClothDetails() {
                 {activeIndex + 1}/{galleryImages.length}
               </div>
             </div>
+          </div>
           </div>
         </div>
 
@@ -404,21 +406,6 @@ function ClothDetails() {
                 Delivery by <strong>{estDeliveryDate}</strong> | Free pickup on return
               </p>
             </div>
-          </div>
-
-          <div className="pdp-card surface">
-            <h3 className="pdp-card-title">About this item</h3>
-            <p className="pdp-amz-desc">
-              {cloth.description?.trim() || "No description available for this outfit yet."}
-            </p>
-            {cloth.detailedDescription?.trim() && (
-              <p className="pdp-amz-desc">{cloth.detailedDescription.trim()}</p>
-            )}
-            <ul className="pdp-list">
-              {highlights.map((line) => (
-                <li key={line}>{line}</li>
-              ))}
-            </ul>
           </div>
 
           <div className="pdp-card surface">
@@ -487,9 +474,25 @@ function ClothDetails() {
               </div>
             )}
           </div>
+
+          <div className="pdp-card surface">
+            <h3 className="pdp-card-title">About this item</h3>
+            <p className="pdp-amz-desc">
+              {cloth.description?.trim() || "No description available for this outfit yet."}
+            </p>
+            {cloth.detailedDescription?.trim() && (
+              <p className="pdp-amz-desc">{cloth.detailedDescription.trim()}</p>
+            )}
+            <ul className="pdp-list">
+              {highlights.map((line) => (
+                <li key={line}>{line}</li>
+              ))}
+            </ul>
+          </div>
         </div>
 
         <aside className="pdp-booking surface">
+          <div className="pdp-sticky-rail">
           <h3>Rent this outfit</h3>
           <p className="pdp-vibe-secure">Trusted quality check | Secure rental workflow</p>
           <p className="pdp-book-note">Blocked dates are already reserved and cannot be selected.</p>
@@ -590,6 +593,7 @@ function ClothDetails() {
               <div className="pdp-admin-note">Owner admin action: only your own product can be changed.</div>
             </div>
           )}
+          </div>
         </aside>
       </section>
 

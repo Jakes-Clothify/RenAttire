@@ -40,30 +40,30 @@ const spotlightCards = [
   {
     title: "Wedding Luxe",
     subtitle: "Premium sherwani and lehenga edits",
-    image: "https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=1400&auto=format&fit=crop",
+    image: "https://sethnik.com/wp-content/uploads/2023/10/WhatsApp-Image-2023-10-19-at-7.22.22-PM.jpeg",
   },
   {
     title: "Party Edit",
     subtitle: "Modern fits for evening events",
-    image: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?q=80&w=1400&auto=format&fit=crop",
+    image: "https://www.stylejunkiie.com/cdn/shop/files/look02_3.jpg?v=1764662327&width=2803",
   },
   {
     title: "Festive Classic",
     subtitle: "Traditional wear with modern comfort",
-    image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=1400&auto=format&fit=crop",
+    image: "https://successmenswear.com/cdn/shop/collections/Festive.jpg?v=1698924097",
   },
   {
     title: "Reception Select",
     subtitle: "Polished evening looks for grand celebrations",
-    image: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?q=80&w=1400&auto=format&fit=crop",
+    image: "https://millionairebombay.com/cdn/shop/files/Sideangle.jpg?v=1732635281",
   },
 ];
 
 const categoryTiles = [
-  { label: "Sherwani", meta: "Groom and reception picks", image: "https://images.unsplash.com/photo-1621184455862-c163dfb30e0f?q=80&w=1000&auto=format&fit=crop", link: "/shop?type=Sherwani" },
-  { label: "Lehenga", meta: "Wedding and sangeet edits", image: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?q=80&w=1000&auto=format&fit=crop", link: "/shop?occasion=Wedding" },
-  { label: "Party Wear", meta: "Cocktail and evening styles", image: "https://images.unsplash.com/photo-1496747611176-843222e1e57c?q=80&w=1000&auto=format&fit=crop", link: "/shop?occasion=Party" },
-  { label: "Festive", meta: "Modern traditional rotation", image: "https://images.unsplash.com/photo-1619472234083-25e6f2b8cb35?q=80&w=1000&auto=format&fit=crop", link: "/shop?occasion=Festive" },
+  { label: "Sherwani", meta: "Groom and reception picks", image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQuvc-jez6siIZBp7epeu61WE5mNOFpKDJMzQ&s", link: "/shop?type=Sherwani" },
+  { label: "Lehenga", meta: "Wedding and sangeet edits", image: "https://empress-clothing.com/cdn/shop/files/AT13001.jpg?v=1724067504", link: "/shop?occasion=Wedding" },
+  { label: "Party Wear", meta: "Cocktail and evening styles", image: "https://www.royalexport.in/product-img/premium-party-wear-ready-made--1734422706.jpg", link: "/shop?occasion=Party" },
+  { label: "Festive", meta: "Modern traditional rotation", image: "https://www.labelmadhurithakkar.com/cdn/shop/files/IMG_5922_6ed3866e-dbdd-43dc-9d14-ddd5ab6f2fac_1400x.jpg?v=1739261758", link: "/shop?occasion=Festive" },
 ];
 
 const valueProps = [
