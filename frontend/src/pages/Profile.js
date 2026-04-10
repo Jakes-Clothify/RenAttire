@@ -12,7 +12,6 @@ function Profile() {
     phone: "",
     city: "",
     bio: "",
-    address: "",
     role: "user",
     companyName: "",
     businessType: "",
@@ -36,7 +35,6 @@ function Profile() {
           phone: res.data.phone || "",
           city: res.data.city || "",
           bio: res.data.bio || "",
-          address: res.data.address || "",
           role: res.data.role || "user",
           companyName: res.data.companyName || "",
           businessType: res.data.businessType || "",
@@ -90,7 +88,6 @@ function Profile() {
         phone: form.phone,
         city: form.city,
         bio: form.bio,
-        address: form.address, 
         companyName: form.companyName,
         businessType: form.businessType,
         gstNumber: form.gstNumber,
@@ -174,17 +171,6 @@ function Profile() {
                     src={resolveMediaUrl(resolvePrimaryImage(order.clothesId))}
                     alt={order.clothesId?.name || "Ordered item"}
                     loading="lazy"
-                  />
-                </div>
-                <div className="form-field">
-                  <label className="field-label">Address</label>
-                  <textarea
-                    className="field-input"
-                    rows={3}
-                    name="address"
-                    value={form.address}
-                    onChange={handleChange}
-                    placeholder="Enter your full address"
                   />
                 </div>
                       
